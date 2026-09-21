@@ -1,0 +1,2419 @@
+<!doctype html>
+<html lang="lt">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>XXL Ašių taisyklė — SCM Startech CN Plus</title>
+<style>
+:root{
+  --bg:#dfe4eb; --panel:#f3f6f9; --panel2:#e8edf3; --line:#c3ccd8;
+  --tx:#1b2330; --tx2:#5f6b7c; --acc:#1f6feb; --ok:#147a45; --warn:#a96400; --bad:#c62828;
+  --pick:#7b1fa2;
+  --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0;background:var(--bg);color:var(--tx);
+     font:13.5px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+header{padding:9px 18px;border-bottom:1px solid var(--line);background:var(--panel);
+       box-shadow:0 1px 3px rgba(20,30,50,.06);
+       display:flex;gap:12px;align-items:baseline}
+header h1{margin:0;font-size:16px;font-weight:650}
+header .sub{color:var(--tx2);font-size:12px}
+main{padding:14px 18px 40px;max-width:1240px;margin:0 auto}
+button{background:var(--acc);color:#fff;border:0;border-radius:8px;padding:8px 14px;
+       font:inherit;font-weight:650;cursor:pointer;white-space:nowrap}
+button:hover{filter:brightness(1.1)}
+button.ghost{background:var(--panel2);color:var(--tx);border:1px solid var(--line);font-weight:500}
+button:disabled{opacity:.4;cursor:not-allowed}
+select,input[type=number],input[type=text]{background:var(--panel2);color:var(--tx);
+  border:1px solid var(--line);border-radius:7px;padding:6px 9px;font:inherit;font-size:13px}
+input[type=number]{width:82px}
+
+/* ---- drop ---- */
+#drop{border:2px dashed var(--line);border-radius:12px;padding:26px 16px;text-align:center;
+      color:var(--tx2);cursor:pointer;transition:.15s;background:var(--panel)}
+#drop.hot{border-color:var(--acc);background:#dbe8fb;color:var(--tx)}
+#drop b{color:var(--tx);font-size:16px;display:block;margin-bottom:3px}
+body.has-files #drop{padding:11px 16px}
+body.has-files #drop b{font-size:13.5px;display:inline;margin:0}
+
+/* ---- settings drawer ---- */
+.drawer{background:var(--panel);border:1px solid var(--line);border-radius:10px;margin-top:10px}
+.dhead{padding:8px 14px;cursor:pointer;user-select:none;color:var(--tx2);font-size:12.5px}
+.dhead:hover{color:var(--tx)}
+#drawerBadge .on{color:var(--warn);font-weight:600;margin-left:10px}
+.caret{display:inline-block;transition:.15s;margin-right:4px}
+.drawer.open .caret{transform:rotate(90deg)}
+.dbody{display:none;padding:2px 14px 12px;border-top:1px solid var(--line)}
+.drawer.open .dbody{display:block}
+.drow{display:flex;gap:9px;align-items:center;flex-wrap:wrap;padding:7px 0}
+.drow .lbl{color:var(--tx2);font-size:12.5px}
+.drow .u{color:var(--tx2);font-size:12.5px}
+.chk{display:flex;align-items:center;gap:7px;cursor:pointer;font-size:13px}
+.chk input{width:15px;height:15px;accent-color:var(--acc);cursor:pointer}
+.dzdep{display:none}
+body.dz-on .dzdep{display:inline-block}
+.path{font-family:var(--mono);font-size:12.5px}
+.path.none{color:var(--tx2)}
+.hint{font-size:12px;color:var(--tx2);padding:2px 0}
+.hint.warn{color:var(--warn)}
+.outlog{max-height:110px;overflow:auto;margin-top:7px;border-top:1px solid var(--line);
+        padding-top:7px;font-family:var(--mono);font-size:11.5px;line-height:1.7}
+.outlog .ok{color:var(--ok)} .outlog .ov{color:var(--warn)} .outlog .er{color:var(--bad)}
+.outlog .t{color:#94a1b2;margin-right:8px}
+
+.allrow{display:flex;gap:8px;margin-top:12px}
+
+/* ---- card ---- */
+.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;
+      margin-top:12px;overflow:hidden;box-shadow:0 1px 3px rgba(20,30,50,.06)}
+.chead{display:flex;gap:10px;align-items:center;padding:9px 12px;
+       border-bottom:1px solid var(--line);background:var(--panel2)}
+.chead .nm{font-family:var(--mono);font-size:13px;font-weight:650;
+           overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:34%}
+.chead .dim{font-family:var(--mono);font-size:13px;color:var(--tx2);white-space:nowrap}
+.chead .dim s{opacity:.55}
+.chead .dim b{color:var(--tx);font-size:14px}
+.chead .grow{flex:1}
+.rotbox{display:flex;align-items:center;gap:7px}
+.rot{background:var(--panel);color:var(--tx);border:1px solid #b9c5d4}
+.rot:hover{background:var(--panel2)}
+.ang{font-family:var(--mono);font-size:13px;color:var(--tx2);min-width:38px;text-align:right}
+.ang.on{color:var(--ok);font-weight:700}
+.dl{background:var(--ok);color:#fff}
+.x{background:transparent;color:var(--tx2);border:0;padding:6px 8px;font-size:15px}
+.x:hover{background:transparent}
+.x:hover{color:var(--bad)}
+
+/* ---- stage ---- */
+.stage{position:relative;background:var(--panel2);border-top:1px solid var(--line)}
+.stage canvas{display:block;width:100%;height:clamp(230px,44vh,500px)}
+.tabs{position:absolute;top:9px;left:9px;display:flex;border:1px solid var(--line);
+      border-radius:7px;overflow:hidden;z-index:2}
+.tabs button{background:rgba(248,250,252,.94);color:var(--tx2);border:0;border-right:1px solid var(--line);
+             padding:4px 12px;font-size:12px;font-weight:600}
+.tabs button:last-child{border-right:0}
+.tabs button.sel{background:var(--acc);color:#fff}
+.tip{position:absolute;right:10px;bottom:8px;font-size:11.5px;color:#8b97a6;pointer-events:none}
+
+/* ---- hole editor ---- */
+.ed{border-top:1px solid var(--line);background:#efe9f5;padding:9px 12px}
+.ed .top{display:flex;gap:9px;align-items:center;flex-wrap:wrap;margin-bottom:7px}
+.ed .top .tag{font-family:var(--mono);font-size:12.5px;font-weight:700;color:var(--pick)}
+.ed .top .sub{font-family:var(--mono);font-size:12px;color:var(--tx2)}
+.ed .ax{display:flex;gap:5px;align-items:center;flex-wrap:wrap;margin-bottom:5px}
+.ed .ax .lbl{font-size:12.5px;color:var(--tx2);width:104px;flex:0 0 auto}
+.ed .ax input{width:92px;font-family:var(--mono);font-size:12.5px;background:var(--panel)}
+.ed .nudge{display:flex;gap:3px}
+.ed .nudge button{background:var(--panel2);color:var(--tx);border:1px solid var(--line);
+  border-radius:6px;padding:4px 0;font-family:var(--mono);font-size:11.5px;width:42px;font-weight:500}
+.ed .nudge button:hover{background:#dde5ee;border-color:#9aa8ba}
+.ed .dlt{font-family:var(--mono);font-size:12px;color:var(--pick);margin-left:5px}
+.ed .acts{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.ed .acts button{padding:5px 11px;font-size:12.5px}
+
+
+/* ---- playback ---- */
+.playbar{display:flex;gap:9px;align-items:center;padding:8px 12px;
+         border-top:1px solid var(--line);background:var(--panel2)}
+.playbar .play{min-width:96px}
+.playbar input[type=range]{flex:1;accent-color:var(--acc);min-width:90px}
+.playbar input[type=range].spd{flex:0 0 96px}
+.playbar .pos{font-family:var(--mono);font-size:12px;color:var(--tx2);
+              min-width:112px;text-align:right}
+.playbar .lbl{font-size:12px;color:var(--tx2)}
+
+/* skipping an operation removes it from the program - make that obvious */
+.ed .acts button.skipbtn{background:#fdecec;color:var(--bad);border:1px solid #f0b7b7;font-weight:650}
+.ed .acts button.skipbtn:hover{background:#fbdcdc;filter:none}
+.ed .acts button.skipbtn.undo{background:#e8f5ec;color:var(--ok);border-color:#aed9bd}
+/* ---- operations ---- */
+.ops{border-top:1px solid var(--line);background:var(--panel2)}
+.ops .head{display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:7px 12px;
+           cursor:pointer;user-select:none}
+.ops .head .ttl{font-size:12.5px;color:var(--tx2)}
+.ops .head .cnt{font-family:var(--mono);font-size:12px;color:var(--tx2)}
+.ops .head .cnt b{color:var(--bad)}
+.ops .body{display:none;padding:0 12px 10px}
+.ops.open .body{display:block}
+.ops .tools{display:flex;gap:5px;flex-wrap:wrap;margin:0 0 8px}
+.ops .tools button{background:var(--panel2);color:var(--tx2);border:1px solid var(--line);
+  border-radius:999px;padding:3px 10px;font-size:11.5px;font-weight:500}
+.ops .tools button:hover{color:var(--tx)}
+.ops .tools button.grp{background:#e7f0ff;color:#14539e;border-color:#b9d3f5}
+.ops .list{max-height:200px;overflow:auto;border:1px solid var(--line);
+           border-radius:8px;background:#fafcfe}
+.ops .row{display:grid;grid-template-columns:20px 28px 1fr;gap:8px;align-items:center;
+          padding:4px 10px;border-bottom:1px solid #dde4ec;font-family:var(--mono);
+          font-size:11.5px;cursor:pointer}
+.ops .row:last-child{border-bottom:0}
+.ops .row:hover{background:var(--panel2)}
+.ops .row.off{opacity:.45}
+.ops .row.off .txt{text-decoration:line-through;color:var(--bad)}
+.ops .row.sel{background:#ead9f3;box-shadow:inset 3px 0 0 var(--pick)}
+.ops .row input{width:14px;height:14px;accent-color:var(--acc);cursor:pointer}
+.ops .row .ix{color:#94a1b2;text-align:right}
+
+/* ---- notes ---- */
+.notes{padding:7px 12px;font-size:12.5px;color:var(--tx2);border-top:1px solid var(--line)}
+.notes b{color:var(--tx);font-weight:600}
+.note{padding:7px 12px;font-size:12.5px;line-height:1.6;border-top:1px solid var(--line)}
+.note .w{color:var(--warn)} .note .e{color:var(--bad)}
+.sentrow{padding:6px 12px;border-top:1px solid var(--line)}
+.sent{font-family:var(--mono);font-size:11.5px;color:var(--ok)}
+.sent.stale{color:var(--warn)}
+
+@media(max-width:820px){
+  .chead{flex-wrap:wrap}
+  .chead .nm{max-width:100%}
+  .stage canvas{height:300px}
+}
+
+/* ---- 3D overlay ---- */
+#v3d{position:fixed;inset:0;background:var(--bg);z-index:50;display:none;flex-direction:column}
+#v3d.on{display:flex}
+#v3d .bar{display:flex;gap:14px;align-items:center;padding:10px 16px;border-bottom:1px solid var(--line);background:var(--panel);flex-wrap:nowrap;overflow-x:auto;scrollbar-width:thin}
+#v3d .bar>*{flex:0 0 auto}
+#v3d .bar .stat{margin-right:auto}
+#v3dClose{position:sticky;right:-16px;margin-right:-16px;padding-right:30px;background:var(--panel2);box-shadow:-18px 0 16px 8px var(--panel)}
+#v3d .bar .nm{font-family:var(--mono);font-weight:650;font-size:13px}
+#v3d .seg{display:flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+#v3d .seg button{background:var(--panel2);color:var(--tx2);border:0;border-right:1px solid var(--line);padding:6px 12px;font:inherit;font-size:12.5px;font-weight:500;cursor:pointer}
+#v3d .seg button:last-child{border-right:0}
+#v3d .seg button.sel{background:var(--acc);color:#04121f;font-weight:650}
+#v3d .wrap{flex:1;display:flex;min-height:0}
+#v3d .stage{flex:1;position:relative;min-width:0}
+#v3d canvas{width:100%;height:100%;display:block;cursor:grab;touch-action:none}
+#v3d canvas.drag{cursor:grabbing}
+#v3d .hint{position:absolute;left:14px;bottom:12px;font-size:11.5px;color:#8b97a6;pointer-events:none;line-height:1.6}
+#v3d .side{width:330px;border-left:1px solid var(--line);background:var(--panel);display:flex;flex-direction:column;min-height:0}
+#v3d .side .grp{padding:12px 14px;border-bottom:1px solid var(--line)}
+#v3d .side h4{margin:0 0 9px;font-size:11px;text-transform:uppercase;letter-spacing:.7px;color:var(--tx2);font-weight:600}
+#v3d .chk2{display:flex;align-items:center;gap:8px;font-size:13px;padding:3px 0;cursor:pointer}
+#v3d .chk2 input{width:15px;height:15px;accent-color:var(--acc);cursor:pointer}
+#v3d .play{display:flex;gap:8px;align-items:center}
+#v3d .play button{padding:7px 12px;font-size:13px}
+#v3d input[type=range]{width:100%;accent-color:var(--acc)}
+#v3d .mv{flex:1;overflow:auto;min-height:0;font-family:var(--mono);font-size:11.5px}
+#v3d .mv .r{display:grid;grid-template-columns:34px 54px 1fr 58px;gap:6px;padding:4px 14px;border-bottom:1px solid var(--line);cursor:pointer;color:var(--tx2)}
+#v3d .mv .r:hover{background:var(--panel2)}
+#v3d .mv .r.cur{background:#e7f0ff;color:var(--tx)}
+#v3d .mv .r .ty{font-weight:700}
+#v3d .mv .r .len{text-align:right}
+#v3d .stat{display:flex;gap:16px;font-family:var(--mono);font-size:11.5px;color:var(--tx2);white-space:nowrap}
+@media(max-width:820px){#v3d .wrap{flex-direction:column}#v3d .side{width:auto;border-left:0;border-top:1px solid var(--line);max-height:44%}}
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <h1>XXL Ašių taisyklė</h1>
+    <div class="sub">SCM Startech CN Plus &middot; SWOOD CAM išvesties pasukimas 90&deg; &middot; <i>rotate programs so the long side runs along X</i></div>
+  </div>
+</header>
+
+<main>
+  <div id="drop">
+    <b>Vilkite .XXL failus čia</b>
+    arba spustelėkite, kad pasirinktumėte
+    <input type="file" id="file" multiple accept=".xxl,.XXL" hidden>
+  </div>
+
+  <div class="drawer" id="drawer">
+    <div class="dhead" id="drawerToggle"><span class="caret">▸</span> Daugiau nustatymų<span id="drawerBadge"></span></div>
+    <div class="dbody">
+      <div class="drow">
+        <label class="chk"><input type="checkbox" id="dzOn"> Keisti medžiagos storį į</label>
+        <input type="number" id="dz" value="16" step="0.1" min="0.1">
+        <span class="u">mm</span>
+        <select id="dzPolicy" class="dzdep">
+          <option value="center">centruotus briaunų gręžinius – į naują centrą</option>
+          <option value="scale">visus perskaičiuoti proporcingai</option>
+          <option value="bottom">visus matuoti nuo apačios</option>
+          <option value="top">visus matuoti nuo viršaus</option>
+        </select>
+      </div>
+
+      <div class="drow">
+        <span class="lbl">Failo vardas:</span>
+        <input type="text" id="outPrefix" value="NEW_" size="7" spellcheck="false">
+        <span class="u">+ originalus</span>
+        <select id="outTags">
+          <option value="orig">be žymų</option>
+          <option value="tag">su žymomis (_X, _16mm, _SEL, _ED)</option>
+        </select>
+      </div>
+
+      <div class="drow" id="outbar">
+        <span class="lbl">Siųsti tiesiai į stakles:</span>
+        <span class="path none" id="outPath">aplankas nepasirinktas</span>
+        <button class="ghost" id="outPick">Pasirinkti aplanką</button>
+        <button class="ghost" id="outForget" hidden>Pamiršti</button>
+        <button id="outGrant" hidden>Atkurti prieigą</button>
+        <label class="chk"><input type="checkbox" id="outAuto"> automatiškai</label>
+      </div>
+      <div class="hint" id="outNote"></div>
+      <div class="outlog" id="outLog" hidden></div>
+    </div>
+  </div>
+
+  <div class="summary" id="summary"></div>
+  <div class="allrow" id="allrow" hidden>
+    <button id="dlall">Atsisiųsti visus</button>
+    <button class="ghost" id="outAll" hidden>Įrašyti visus į stakles</button>
+  </div>
+  <div id="list"></div>
+</main>
+
+<div id="v3d">
+  <div class="bar">
+    <div class="nm" id="v3dName">—</div>
+    <div class="seg" id="v3dWhich">
+      <button data-w="before">Prieš</button><button data-w="after" class="sel">Po pakeitimo</button>
+    </div>
+    <div class="seg" id="v3dPreset">
+      <button data-v="iso">Izo</button><button data-v="top">Viršus</button>
+      <button data-v="front">Priekis</button><button data-v="right">Dešinė</button>
+    </div>
+    <div class="stat" id="v3dStat"></div>
+    <button class="ghost" id="v3dClose" title="Esc">Uždaryti ✕</button>
+  </div>
+  <div class="wrap">
+    <div class="stage"><canvas id="v3dCv"></canvas>
+      <div class="hint">Vilkti — sukti &middot; Ratukas — priartinti &middot; Shift+vilkti — stumti</div>
+    </div>
+    <div class="side">
+      <div class="grp">
+        <h4>Rodyti</h4>
+        <label class="chk2"><input type="checkbox" id="v3dXray" checked> Permatoma plokštė</label>
+        <label class="chk2"><input type="checkbox" id="v3dHoles" checked> Gręžiniai</label>
+        <label class="chk2"><input type="checkbox" id="v3dFeed" checked> Darbinė eiga</label>
+        <label class="chk2"><input type="checkbox" id="v3dRapid" checked> Greitoji eiga</label>
+        <label class="chk2"><input type="checkbox" id="v3dTable" checked> Staklių stalas</label>
+      </div>
+      <div class="grp">
+        <h4>Suklio judesys</h4>
+        <div class="play">
+          <button id="v3dPlay">▶ Leisti</button>
+          <button class="ghost" id="v3dStop">⟲</button>
+          <span id="v3dPos" style="font-family:var(--mono);font-size:12px;color:var(--tx2)"></span>
+        </div>
+        <input type="range" id="v3dScrub" min="0" max="1000" value="0" style="margin-top:10px">
+        <div style="display:flex;gap:8px;align-items:center;margin-top:8px">
+          <span style="font-size:11.5px;color:var(--tx2)">Greitis</span>
+          <input type="range" id="v3dSpeed" min="1" max="60" value="18">
+        </div>
+      </div>
+      <h4 style="padding:11px 14px 6px;margin:0;font-size:11px;text-transform:uppercase;letter-spacing:.7px;color:var(--tx2)">Judesių seka</h4>
+      <div class="mv" id="v3dMoves"></div>
+    </div>
+  </div>
+</div>
+
+
+<script id="palette">
+/* Drawing colours for both the 2D preview and the 3D view. */
+var PAL = {
+  bg:      "#e6ebf1",
+  grid:    "#d3dbe4",
+  fill:    "#fbfcfe",
+  edge:    "#3f4956",
+  wire:    "#47525f",
+  holeTop: "#1f6feb",
+  holeSide:"#d98200",
+  feed:    "#147a45",
+  feedDim: "#a6d7bd",
+  rapid:   "#6b7887",
+  rapidDim:"#c7cfd9",
+  off:     "#c62828",
+  sel:     "#7b1fa2",
+  tool:    "#d32f2f",
+  axX:     "#c62828", axY: "#147a45", axZ: "#1f6feb",
+  label:   "#5f6b7c", origin: "#1b2330",
+  faceTop: "#b8c3d0", faceBot: "#8e9bab", faceSide: "#a4b0bf", faceSide2: "#99a5b5"
+};
+</script>
+<script id="xxl-core">
+/* ============================================================================
+   XXL core — parse / analyse / rotate SCM Xilog-Maestro .XXL part programs.
+
+   Face model (verified against 1284 shop programs on this machine):
+     F=1 top        local X,Y = machine X,Y
+     F=2 left  X=0   local X = thickness, local Y = +machine Y   (origin 0)
+     F=3 right X=DX  local X = thickness, local Y = machine Y - DY  (negative)
+     F=4 front Y=0   local X = +machine X, local Y = thickness   (origin 0)
+     F=5 rear  Y=DY  local X = machine X - DX (negative), local Y = thickness
+     F=6 bottom
+   Rotation is a pure rotation (never a mirror), so arc direction G=2/G=3 and
+   cutter compensation C= are preserved unchanged.
+============================================================================ */
+var XXL = (function () {
+  "use strict";
+
+  var PARAM = /([A-Za-z]+)=("[^"]*"|-?\d*\.?\d+|[^\s;]+)/g;
+
+  // ---- number helpers: keep the source file's own decimal style ------------
+  function dpOf(tok) { var m = /\.(\d+)/.exec(String(tok)); return m ? m[1].length : 0; }
+  function fmt(v, dp) {
+    dp = Math.min(Math.max(dp | 0, 0), 6);
+    var s = (+v).toFixed(dp);
+    if (/^-0(\.0+)?$/.test(s)) s = s.slice(1);   // no "-0.000"
+    return s;
+  }
+  function sub(a, b, tokA, tokB) {              // a - b, formatted sensibly
+    return fmt(a - b, Math.max(dpOf(tokA), dpOf(tokB)));
+  }
+
+  // ---- split a line into code + trailing comment (";" outside quotes) ------
+  function splitComment(line) {
+    var q = false;
+    for (var i = 0; i < line.length; i++) {
+      var c = line[i];
+      if (c === '"') q = !q;
+      else if (c === ';' && !q) return [line.slice(0, i), line.slice(i)];
+    }
+    return [line, ""];
+  }
+
+  function params(code) {
+    var m = {}, mt; PARAM.lastIndex = 0;
+    while ((mt = PARAM.exec(code))) m[mt[1]] = mt[2];
+    return m;
+  }
+  function num(m, k) { return m[k] === undefined ? undefined : parseFloat(m[k]); }
+
+  /* Replace only the listed parameters, leaving spacing, order, quoting and any
+     trailing junk (e.g. SWOOD's "#") byte-identical. */
+  function setParams(code, upd) {
+    PARAM.lastIndex = 0;
+    return code.replace(PARAM, function (full, k, v) {
+      return Object.prototype.hasOwnProperty.call(upd, k) ? k + "=" + upd[k] : full;
+    });
+  }
+
+  // ---- face geometry ------------------------------------------------------
+  /* -> {side, s, t}  s = distance along the edge in machine coords, t = thickness.
+
+     The along-edge ORIGIN comes from the active "O … ;ChangePlane" line, never
+     from the face number.  Maestro moves that origin to the far end for F3/F5,
+     which is why its coordinates there are negative.  SWOOD emits no
+     ChangePlane at all, so the origin stays 0 and every face counts positively
+     from the near corner.  Assuming the Maestro rule put SWOOD's edge holes
+     right off the panel. */
+  var ORG0 = { x: 0, y: 0 };
+
+  function faceToSide(face, lx, ly, DX, DY, org) {
+    org = org || ORG0;
+    switch (face) {
+      case 2: case 3: return { side: face === 2 ? "L" : "R", s: org.y + ly, t: lx };
+      case 4: case 5: return { side: face === 4 ? "F" : "B", s: org.x + lx, t: ly };
+    }
+    return null;
+  }
+  function sideToFace(side, s, t, DX, DY, org) {
+    org = org || ORG0;
+    switch (side) {
+      case "L": return { face: 2, lx: t, ly: s - org.y };
+      case "R": return { face: 3, lx: t, ly: s - org.y };
+      case "F": return { face: 4, lx: s - org.x, ly: t };
+      case "B": return { face: 5, lx: s - org.x, ly: t };
+    }
+    return null;
+  }
+  /* Where a rewritten program will put the plane origin for a given face. */
+  function planeOrigin(face, DX, DY, hasPlanes) {
+    if (!hasPlanes) return ORG0;
+    if (face === 3) return { x: 0, y: DY };
+    if (face === 5) return { x: DX, y: 0 };
+    return ORG0;
+  }
+  // machine-plane point of an edge feature, for drawing
+  function sidePoint(side, s, DX, DY) {
+    switch (side) {
+      case "L": return [0, s];
+      case "R": return [DX, s];
+      case "F": return [s, 0];
+      case "B": return [s, DY];
+    }
+    return [0, 0];
+  }
+
+  /* Where does each edge go, and what is its new along-edge distance?
+     CCW (x,y) -> (DY-y, x)      CW (x,y) -> (y, DX-x)     DX'=DY, DY'=DX  */
+  function rotSide(side, s, DX, DY, ccw) {
+    if (ccw) {
+      if (side === "L") return { side: "F", s: DY - s };
+      if (side === "R") return { side: "B", s: DY - s };
+      if (side === "F") return { side: "R", s: s };
+      if (side === "B") return { side: "L", s: s };
+    } else {
+      if (side === "L") return { side: "B", s: s };
+      if (side === "R") return { side: "F", s: s };
+      if (side === "F") return { side: "L", s: DX - s };
+      if (side === "B") return { side: "R", s: DX - s };
+    }
+    return { side: side, s: s };
+  }
+  function rotFace(face, ccw) {
+    if (face === 1 || face === 6) return face;
+    var side = { 2: "L", 3: "R", 4: "F", 5: "B" }[face];
+    if (!side) return face;
+    var r = rotSide(side, 0, 0, 0, ccw).side;
+    return { L: 2, R: 3, F: 4, B: 5 }[r];
+  }
+
+  // ---- parse --------------------------------------------------------------
+  function parse(text) {
+    var crlf = /\r\n/.test(text);
+    var trailing = /\n$/.test(text);
+    var lines = text.split(/\r?\n/);
+    if (trailing) lines.pop();
+
+    var doc = {
+      crlf: crlf, trailing: trailing, lines: lines,
+      DX: 0, DY: 0, DZ: 0, headerIdx: -1, headerTok: {},
+      dialect: "unknown", holes: [], paths: [], warnings: [], errors: [], zfast: null,
+      hasPlanes: false,
+      faceUse: {}, opCount: 0
+    };
+
+    var face = 1, cur = null, planeFace = -1, org = ORG0;
+
+    for (var i = 0; i < lines.length; i++) {
+      var raw = lines[i];
+      var sc = splitComment(raw);
+      var code = sc[0].trim();
+      if (!code) continue;
+
+      if (/^H\s/i.test(code) && doc.headerIdx < 0) {
+        var p = params(code);
+        doc.headerIdx = i; doc.headerTok = p;
+        doc.DX = num(p, "DX") || 0; doc.DY = num(p, "DY") || 0; doc.DZ = num(p, "DZ") || 0;
+        doc.dialect = /-EH/.test(code) || /BZ=/.test(code) ? "swood" : "maestro";
+        doc.machine = (/\/"([^"]*)"/.exec(code) || [, ""])[1];
+        continue;
+      }
+
+      if (/^SET\s/i.test(code)) {
+        var zf = /ZFAST\s*=\s*(-?[\d.]+)/i.exec(code);
+        if (zf) doc.zfast = parseFloat(zf[1]);
+        continue;
+      }
+
+      if (/^REFERENCE\s*=/i.test(code)) {
+        var rv = code.split("=")[1].trim().toUpperCase();
+        if (rv !== "LOWERLEFT") doc.errors.push("Eilutė " + (i + 1) + ": REFERENCE=" + rv +
+          " — kitokia atskaitos kampas, automatinis sukimas nepatikimas.");
+        continue;
+      }
+      if (/^\.OP\d+/i.test(code)) { doc.opCount++; continue; }
+      if (/^F=\d+\s*$/i.test(code)) { face = parseInt(code.split("=")[1], 10); continue; }
+
+      var pm = params(code);
+
+      if (/ChangePlane/i.test(sc[1]) || (/^O\s/i.test(code) && pm.F !== undefined)) {
+        if (pm.F !== undefined) face = parseInt(pm.F, 10);
+        org = { x: num(pm, "X") || 0, y: num(pm, "Y") || 0 };
+        planeFace = face; doc.hasPlanes = true;
+        continue;
+      }
+
+      if (/^XBO/i.test(code)) {
+        var f = pm.F !== undefined ? parseInt(pm.F, 10) : face;
+        doc.faceUse[f] = (doc.faceUse[f] || 0) + 1;
+        var x = num(pm, "X"), y = num(pm, "Y"), z = num(pm, "Z"), d = num(pm, "D") || 5;
+        if (f === 1 || f === 6) {
+          doc.holes.push({ face: f, x: x, y: y, z: z, d: d, edge: null, line: i });
+        } else {
+          var sd = faceToSide(f, x, y, doc.DX, doc.DY, f === planeFace ? org : ORG0);
+          if (sd) {
+            var pt = sidePoint(sd.side, sd.s, doc.DX, doc.DY);
+            doc.holes.push({ face: f, x: pt[0], y: pt[1], z: z, d: d, edge: sd.side, t: sd.t, line: i });
+          }
+        }
+        continue;
+      }
+
+      if (/^XG0/i.test(code)) {
+        cur = { face: face, line: i, lastLine: i, d: num(pm, "D") || 0, tool: pm.T,
+                pts: [[num(pm, "X"), num(pm, "Y"), num(pm, "Z"), 1]] };
+        doc.paths.push(cur); continue;
+      }
+      if (/^(XL2P|XA2P)/i.test(code)) {
+        if (!cur) { cur = { face: face, line: i, lastLine: i, d: 0, pts: [] }; doc.paths.push(cur); }
+        cur.lastLine = i;
+        cur.pts.push([num(pm, "X"), num(pm, "Y"), num(pm, "Z"), 0,
+                      num(pm, "I"), num(pm, "J"), pm.G === undefined ? 0 : parseInt(pm.G, 10)]);
+        continue;
+      }
+    }
+
+    if (doc.headerIdx < 0) doc.errors.push("Nerasta H antraštė — tai ne XXL failas?");
+
+    /* Stable identity for every operation: its position in program order.
+       Line numbers cannot be used — transform() inserts a stamp line, which
+       would shift every index and make a click land on the next operation. */
+    doc.holes.concat(doc.paths)
+       .sort(function (a, b) { return a.line - b.line; })
+       .forEach(function (o, k) { o.op = k; });
+    return doc;
+  }
+
+  // ---- rotate -------------------------------------------------------------
+  function rotate(text, ccw, ropts) {
+    ropts = ropts || {};
+    var doc = parse(text);
+    if (doc.headerIdx < 0) return { ok: false, text: text, doc: doc };
+
+    var DX = doc.DX, DY = doc.DY;
+    var tDX = doc.headerTok.DX, tDY = doc.headerTok.DY;
+    var out = doc.lines.slice();
+
+
+    // point transform returning preformatted strings
+    function xy(x, y, tx, ty) {
+      if (ccw) return { X: sub(DY, y, tDY, ty), Y: tx };   // (DY-y, x)
+      return { X: ty, Y: sub(DX, x, tDX, tx) };            // (y, DX-x)
+    }
+
+    var face = 1, planeFace = -1, org = ORG0;
+
+    for (var i = 0; i < out.length; i++) {
+      var raw = out[i];
+      var sc = splitComment(raw);
+      var code = sc[0], cmt = sc[1];
+      var t = code.trim();
+      if (!t) continue;
+
+      // header: swap DX/DY (and BX/BY if present) using the raw tokens
+      if (i === doc.headerIdx) {
+        var upd = { DX: tDY, DY: tDX };
+        if (doc.headerTok.BX !== undefined && doc.headerTok.BY !== undefined) {
+          upd.BX = doc.headerTok.BY; upd.BY = doc.headerTok.BX;
+          if (parseFloat(doc.headerTok.BX) !== 0 || parseFloat(doc.headerTok.BY) !== 0)
+            doc.warnings.push("Antraštėje BX/BY nelygūs nuliui — sukeista vietomis, patikrinkite.");
+        }
+        out[i] = setParams(code, upd) + cmt;
+        continue;
+      }
+
+      if (/^F=\d+\s*$/i.test(t)) {
+        var fv = parseInt(t.split("=")[1], 10);
+        face = fv;
+        out[i] = code.replace(/F=\d+/i, "F=" + rotFace(fv, ccw)) + cmt;
+        continue;
+      }
+
+      var pm = params(code);
+
+      // O ... F=n ;ChangePlane  -> regenerate the canonical plane origin
+      if (/^O\s/i.test(t) && pm.F !== undefined) {
+        var of = parseInt(pm.F, 10), nf = rotFace(of, ccw);
+        face = of; planeFace = of;
+        org = { x: num(pm, "X") || 0, y: num(pm, "Y") || 0 };
+        var nDX = DY, nDY = DX;                    // dimensions after rotation
+        var ox = "0", oy = "0";
+        if (nf === 3) oy = fmt(nDY, dpOf(tDX));    // O Y=DY'
+        if (nf === 5) ox = fmt(nDX, dpOf(tDY));    // O X=DX'
+        out[i] = setParams(code, { X: ox, Y: oy, F: String(nf) }) + cmt;
+        continue;
+      }
+
+      if (/^XBO/i.test(t)) {
+        var f = pm.F !== undefined ? parseInt(pm.F, 10) : face;
+        var u = {};
+        if (f === 1 || f === 6) {
+          var r = xy(num(pm, "X"), num(pm, "Y"), pm.X, pm.Y);
+          u.X = r.X; u.Y = r.Y;
+        } else {
+          var sd = faceToSide(f, num(pm, "X"), num(pm, "Y"), DX, DY,
+                              f === planeFace ? org : ORG0);
+          var rs = rotSide(sd.side, sd.s, DX, DY, ccw);
+          var nf2 = { L: 2, R: 3, F: 4, B: 5 }[rs.side];
+          // new DX = old DY, new DY = old DX
+          var back = sideToFace(rs.side, rs.s, sd.t, DY, DX,
+                                planeOrigin(nf2, DY, DX, doc.hasPlanes));
+          var dp = Math.max(dpOf(pm.X), dpOf(pm.Y), dpOf(tDX), dpOf(tDY));
+          u.X = fmt(back.lx, dp); u.Y = fmt(back.ly, dp);
+          if (pm.F !== undefined) u.F = String(nf2);
+        }
+        out[i] = setParams(code, u) + cmt;
+        continue;
+      }
+
+      if (/^(XG0|XL2P|XA2P)/i.test(t)) {
+        var u2 = {};
+        if (pm.X !== undefined && pm.Y !== undefined) {
+          var r2 = xy(num(pm, "X"), num(pm, "Y"), pm.X, pm.Y);
+          u2.X = r2.X; u2.Y = r2.Y;
+        }
+        if (pm.I !== undefined && pm.J !== undefined) {       // absolute arc centre
+          var r3 = xy(num(pm, "I"), num(pm, "J"), pm.I, pm.J);
+          u2.I = r3.X; u2.J = r3.Y;
+        }
+        out[i] = setParams(code, u2) + cmt;
+        continue;
+      }
+    }
+
+    if (ropts.stamp !== false) {
+      out.splice(doc.headerIdx + 1, 0, ";*** XXL Fix: pasukta 90 " +
+        (ccw ? "CCW (pries laikrodi)" : "CW (pagal laikrodi)") +
+        "  |  buvo DX=" + tDX + " DY=" + tDY + "  ->  DX=" + tDY + " DY=" + tDX + " ***");
+    }
+
+    var nl = doc.crlf ? "\r\n" : "\n";
+    return { ok: true, text: out.join(nl) + (doc.trailing ? nl : ""), doc: doc };
+  }
+
+  /* ==========================================================================
+     Thickness change.  Two independent things move when DZ changes:
+       - side holes (F2-F5): the thickness coordinate.  A hole that sat on the
+         centre line must stay on the centre line (9 in 18mm -> 8 in 16mm).
+       - anything drilled/cut THROUGH the panel: the depth must keep the same
+         overshoot past the back face, or it stops cutting through.
+     Blind depths are set by the fitting, not the board, so they stay put -
+     but they are flagged if the thinner board turns them into breakthroughs.
+  ========================================================================== */
+  function dpFor(tok, val) { return Math.max(dpOf(tok), dpOf(String(val))); }
+
+  function newThick(t, DZ, nDZ, policy, tol) {
+    if (policy === "scale")  return { v: t * nDZ / DZ, moved: true };
+    if (policy === "bottom") return { v: t, moved: false };
+    if (policy === "top")    return { v: t - (DZ - nDZ), moved: true };
+    if (Math.abs(t - DZ / 2) <= tol) return { v: nDZ / 2, moved: true, centred: true };
+    return { v: t, moved: false, offCentre: true };
+  }
+
+  function newDepth(z, DZ, nDZ) {
+    if (!(z < 0)) return { v: z, kind: "clear" };            // rapid / retract height
+    var d = -z;
+    if (d >= DZ - 1e-6) return { v: -(nDZ + (d - DZ)), kind: "through" };
+    return { v: z, kind: d >= nDZ - 1e-6 ? "breakthrough" : "blind" };
+  }
+
+  function setThickness(text, nDZ, opts) {
+    opts = opts || {};
+    var policy = opts.policy || "center";
+    var tol = opts.tol === undefined ? 0.25 : opts.tol;
+    var doc = parse(text);
+    if (doc.headerIdx < 0) return { ok: false, text: text, doc: doc, notes: [], warnings: [] };
+
+    var DZ = doc.DZ, tDZ = doc.headerTok.DZ;
+    if (!(DZ > 0)) return { ok: false, text: text, doc: doc, notes: [],
+                            warnings: ["Antraštėje nerastas DZ — storio keisti negalima."] };
+
+    var out = doc.lines.slice(), notes = [], warn = [];
+    var nEdge = 0, nOff = 0, nThru = 0, nBreak = 0, exEdge = null, exThru = null;
+    var face = 1, planeFace = -1, org = ORG0;
+
+    for (var i = 0; i < out.length; i++) {
+      var sc = splitComment(out[i]), code = sc[0], cmt = sc[1], t = code.trim();
+      if (!t) continue;
+
+      if (i === doc.headerIdx) { out[i] = setParams(code, { DZ: fmt(nDZ, dpFor(tDZ, nDZ)) }) + cmt; continue; }
+      if (/^F=\d+\s*$/i.test(t)) { face = parseInt(t.split("=")[1], 10); continue; }
+
+      var pm = params(code);
+      if (/^O\s/i.test(t) && pm.F !== undefined) { face = parseInt(pm.F, 10); continue; }
+
+      if (/^XBO/i.test(t)) {
+        var f = pm.F !== undefined ? parseInt(pm.F, 10) : face;
+        var u = {};
+        if (f >= 2 && f <= 5) {
+          var key = (f === 2 || f === 3) ? "X" : "Y";      // which param holds the thickness
+          var t0 = parseFloat(pm[key]);
+          var r = newThick(t0, DZ, nDZ, policy, tol);
+          if (r.moved && Math.abs(r.v - t0) > 1e-9) {
+            u[key] = fmt(r.v, dpFor(pm[key], nDZ));
+            nEdge++; if (!exEdge) exEdge = t0 + " → " + u[key];
+          }
+          if (r.offCentre) {
+            nOff++;
+            warn.push("Eilutė " + (i + 1) + ": briaunos gręžinys ne centre (" + t0 +
+              " iš " + DZ + ") — paliktas nuo apatinės pusės, patikrinkite.");
+          }
+          var tv = r.v, dia = parseFloat(pm.D) || 0;
+          if (tv < 0 || tv > nDZ)
+            warn.push("Eilutė " + (i + 1) + ": gręžinys " + fmt(tv, 2) + " mm nepatenka į " + nDZ + " mm storį.");
+          else if (dia && (tv - dia / 2 < -1e-6 || tv + dia / 2 > nDZ + 1e-6))
+            warn.push("Eilutė " + (i + 1) + ": ⌀" + dia + " gręžinys ties " + fmt(tv, 2) +
+              " mm išeina už " + nDZ + " mm storio.");
+        } else {
+          var z0 = parseFloat(pm.Z), rz = newDepth(z0, DZ, nDZ);
+          if (rz.kind === "through" && Math.abs(rz.v - z0) > 1e-9) {
+            u.Z = fmt(rz.v, dpFor(pm.Z, nDZ));
+            nThru++; if (!exThru) exThru = z0 + " → " + u.Z;
+          } else if (rz.kind === "breakthrough") {
+            nBreak++;
+            warn.push("Eilutė " + (i + 1) + ": aklinas " + z0 + " mm gręžinys " + nDZ +
+              " mm plokštėje taps kiauras.");
+          }
+        }
+        out[i] = setParams(code, u) + cmt;
+        continue;
+      }
+
+      if (/^(XG0|XL2P|XA2P)/i.test(t) && pm.Z !== undefined) {
+        var zc = parseFloat(pm.Z), rc = newDepth(zc, DZ, nDZ);
+        if (rc.kind === "through" && Math.abs(rc.v - zc) > 1e-9) {
+          out[i] = setParams(code, { Z: fmt(rc.v, dpFor(pm.Z, nDZ)) }) + cmt;
+          nThru++; if (!exThru) exThru = zc + " → " + fmt(rc.v, dpFor(pm.Z, nDZ));
+        } else if (rc.kind === "breakthrough") {
+          nBreak++;
+          warn.push("Eilutė " + (i + 1) + ": aklinas frezavimas " + zc + " mm taps kiauras.");
+        }
+        continue;
+      }
+    }
+
+    notes.push("Storis " + DZ + " → " + nDZ + " mm");
+    if (nEdge) notes.push("briaunų gręžiniai perkelti į centrą: " + nEdge + " vnt. (" + exEdge + ")");
+    if (nOff) notes.push("ne centre palikta: " + nOff + " vnt.");
+    if (nThru) notes.push("kiaurų gylių pataisyta: " + nThru + " vnt. (" + exThru + ")");
+    if (nBreak) notes.push("aklinų, kurie taps kiaurais: " + nBreak + " vnt.");
+
+    var nl = doc.crlf ? "\r\n" : "\n";
+    var res = { ok: true, text: out.join(nl) + (doc.trailing ? nl : ""), doc: doc,
+                notes: notes, warnings: warn, counts: { edge: nEdge, off: nOff, thru: nThru, brk: nBreak } };
+    if (opts.stamp !== false) res.text = withStamp(res.text, doc.headerIdx,
+      ";*** XXL Fix: storis " + DZ + " -> " + nDZ + " mm ***", nl);
+    return res;
+  }
+
+  function withStamp(text, headerIdx, line, nl) {
+    var ls = text.split(/\r?\n/);
+    var tail = /\n$/.test(text);
+    if (tail) ls.pop();
+    ls.splice(headerIdx + 1, 0, line);
+    return ls.join(nl) + (tail ? nl : "");
+  }
+
+  /* Comment out the operations the user does not want.  Only material-removal
+     lines are touched - plane/state lines (F=, O ;ChangePlane, REFERENCE, SET)
+     stay put so the rest of the program keeps running in the right frame.
+     Line indices survive rotate()/setThickness() because neither adds or
+     removes lines when stamping is off. */
+  var SKIP_TAG = ";XXLFIX-SKIP ";
+
+  function applySkip(text, ids, srcDoc) {
+    var doc = srcDoc || parse(text);
+    var lines = text.split(/\r?\n/);
+    var tail = /\n$/.test(text); if (tail) lines.pop();
+    var want = {}, n = 0;
+    (ids || []).forEach(function (i) { want[i] = 1; });
+
+    var ranges = [];
+    doc.holes.forEach(function (h) { if (want[h.op]) ranges.push([h.line, h.line]); });
+    doc.paths.forEach(function (p) {
+      if (want[p.op]) ranges.push([p.line, p.lastLine === undefined ? p.line : p.lastLine]);
+    });
+
+    ranges.forEach(function (r) {
+      for (var i = r[0]; i <= r[1] && i < lines.length; i++) {
+        if (lines[i].indexOf(SKIP_TAG) === 0) continue;
+        lines[i] = SKIP_TAG + lines[i]; n++;
+      }
+    });
+    return { text: lines.join(doc.crlf ? "\r\n" : "\n") + (tail ? (doc.crlf ? "\r\n" : "\n") : ""),
+             lines: n, ops: ranges.length };
+  }
+
+  /* The operations a user can pick from, in program order. */
+  function operations(doc) {
+    var ops = [];
+    doc.holes.forEach(function (h) {
+      ops.push({ id: h.op, line: h.line, kind: "bore", face: h.face, d: h.d, z: h.z,
+                 x: h.x, y: h.y, t: h.t, edge: h.edge });
+    });
+    doc.paths.forEach(function (p) {
+      var pts = p.pts.filter(function (q) { return isFinite(q[0]) && isFinite(q[1]); });
+      var L = 0;
+      for (var i = 1; i < pts.length; i++)
+        L += Math.hypot(pts[i][0]-pts[i-1][0], pts[i][1]-pts[i-1][1]);
+      ops.push({ id: p.op, line: p.line, kind: "route", face: p.face, d: p.d, n: pts.length,
+                 len: L, x: pts.length ? pts[0][0] : 0, y: pts.length ? pts[0][1] : 0 });
+    });
+    ops.sort(function (a, b) { return a.id - b.id; });
+    return ops;
+  }
+
+  /* Nudge individual holes.  Deltas are in the FINAL program's frame, so they
+     are applied after rotation/thickness — "+2 in X" means what the operator
+     sees and what the machine will do.
+
+     Which XBO parameter carries what depends on the face:
+       F1/F6  X = machine X,      Y = machine Y
+       F2/F3  X = thickness,      Y = along the edge
+       F4/F5  X = along the edge, Y = thickness
+     so an edit is always just an addition to the right parameter. */
+  function applyEdits(text, edits, srcDoc) {
+    var doc = srcDoc || parse(text);
+    var lines = text.split(/\r?\n/);
+    var tail = /\n$/.test(text); if (tail) lines.pop();
+    var n = 0, warn = [];
+
+    doc.holes.forEach(function (h) {
+      var e = edits[h.op]; if (!e) return;
+      var sc = splitComment(lines[h.line]), code = sc[0], cmt = sc[1];
+      var pm = params(code), u = {};
+      var alongX = (h.face === 1 || h.face === 6 || h.face === 4 || h.face === 5);
+      var dX = (h.face === 1 || h.face === 6) ? (e.dx || 0)
+             : (h.face === 4 || h.face === 5) ? (e.ds || 0) : (e.dt || 0);
+      var dY = (h.face === 1 || h.face === 6) ? (e.dy || 0)
+             : (h.face === 4 || h.face === 5) ? (e.dt || 0) : (e.ds || 0);
+      if (dX && pm.X !== undefined) u.X = fmt(parseFloat(pm.X) + dX, dpFor(pm.X, dX));
+      if (dY && pm.Y !== undefined) u.Y = fmt(parseFloat(pm.Y) + dY, dpFor(pm.Y, dY));
+      if (e.dz && pm.Z !== undefined) u.Z = fmt(parseFloat(pm.Z) + e.dz, dpFor(pm.Z, e.dz));
+      if (e.d != null && pm.D !== undefined && parseFloat(pm.D) !== e.d)
+        u.D = fmt(e.d, dpFor(pm.D, e.d));
+      if (!Object.keys(u).length) return;
+      lines[h.line] = setParams(code, u) + cmt;
+      n++;
+
+      // keep the result inside the panel
+      var nx = u.X !== undefined ? parseFloat(u.X) : (pm.X !== undefined ? parseFloat(pm.X) : 0);
+      var ny = u.Y !== undefined ? parseFloat(u.Y) : (pm.Y !== undefined ? parseFloat(pm.Y) : 0);
+      if (h.face === 1 || h.face === 6) {
+        if (nx < 0 || nx > doc.DX || ny < 0 || ny > doc.DY)
+          warn.push("Operacija " + (h.op + 1) + ": perkeltas gręžinys (" + fmt(nx,1) + ", " + fmt(ny,1) +
+            ") išeina už plokštės " + doc.DX + "×" + doc.DY + ".");
+      } else {
+        var t = (h.face === 2 || h.face === 3) ? nx : ny;
+        if (t < 0 || t > doc.DZ)
+          warn.push("Operacija " + (h.op + 1) + ": gręžinys ties " + fmt(t,1) +
+            " mm nepatenka į " + doc.DZ + " mm storį.");
+      }
+    });
+
+    return { text: lines.join(doc.crlf ? "\r\n" : "\n") + (tail ? (doc.crlf ? "\r\n" : "\n") : ""),
+             n: n, warnings: warn };
+  }
+
+  /* One entry point: rotate and/or re-thickness and/or edit and/or drop. */
+  function transform(text, o) {
+    o = o || {};
+    var src = parse(text);
+    var cur = text, notes = [], warn = [], bits = [];
+    var skip = (o.skip || []).filter(function (i) { return i != null; });
+
+    var steps = o.rot === true ? 1 : ((o.rot | 0) % 4 + 4) % 4;
+    if (steps) {
+      for (var k = 0; k < steps; k++) {
+        var r = rotate(cur, true, { stamp: false });
+        if (!r.ok) return { ok: false, text: text, notes: [], warnings: ["Nepavyko pasukti."] };
+        cur = r.text;
+        warn = warn.concat(r.doc.warnings);
+      }
+      var rd = parse(cur), deg = steps * 90;
+      bits.push("pasukta " + deg + " laipsniu, buvo DX=" + src.DX + " DY=" + src.DY +
+                " -> DX=" + rd.DX + " DY=" + rd.DY);
+      notes.push("Pasukta " + deg + "°: " + src.DX + "×" + src.DY + " → " + rd.DX + "×" + rd.DY + " mm");
+    }
+    if (o.dz && Math.abs(o.dz - src.DZ) > 1e-9) {
+      var t2 = setThickness(cur, o.dz, { policy: o.policy, tol: o.tol, stamp: false });
+      if (!t2.ok) return { ok: false, text: cur, notes: notes, warnings: warn.concat(t2.warnings) };
+      cur = t2.text; notes = notes.concat(t2.notes); warn = warn.concat(t2.warnings);
+      bits.push("storis " + src.DZ + " -> " + o.dz + " mm");
+    }
+    var edits = o.edits || {};
+    var eKeys = Object.keys(edits).filter(function (k) {
+      var e = edits[k];
+      return e && (e.dx || e.dy || e.ds || e.dt || e.dz || e.d != null);
+    });
+    if (eKeys.length) {
+      var ed = applyEdits(cur, edits, parse(cur));
+      cur = ed.text; warn = warn.concat(ed.warnings);
+      if (ed.n) { bits.push("pataisyta gręžiniu: " + ed.n); notes.push("Pakoreguota gręžinių: " + ed.n); }
+    }
+    if (skip.length) {
+      var sk = applySkip(cur, skip, src);
+      cur = sk.text;
+      bits.push("praleista operaciju: " + sk.ops);
+      notes.push("Praleista operacijų: " + sk.ops + " (užkomentuota " + sk.lines + " eil.)");
+    }
+    if (!bits.length) return { ok: false, text: text, notes: [], warnings: [] };
+
+    var nl = /\r\n/.test(text) ? "\r\n" : "\n";
+    cur = withStamp(cur, src.headerIdx, ";*** XXL Fix: " + bits.join("  |  ") + " ***", nl);
+    return { ok: true, text: cur, notes: notes, warnings: warn };
+  }
+
+  return {
+    parse: parse, rotate: rotate, setThickness: setThickness, transform: transform,
+    applySkip: applySkip, applyEdits: applyEdits, operations: operations,
+    SKIP_TAG: SKIP_TAG,
+    _: { faceToSide: faceToSide, sideToFace: sideToFace, rotSide: rotSide, rotFace: rotFace,
+         setParams: setParams, params: params, fmt: fmt, splitComment: splitComment,
+         newThick: newThick, newDepth: newDepth }
+  };
+})();
+</script>
+
+<script id="outdir">
+/* ============================================================================
+   Write finished programs straight into the folder the CNC reads.
+
+   Uses the File System Access API (Chromium: Chrome / Edge).  It needs a secure
+   context, which a local file:// page satisfies, so this works in the
+   single-file deployment as well as over localhost.  Firefox has no such API -
+   there we fall back to ordinary downloads and say so.
+
+   The directory handle is kept in IndexedDB so the folder survives a restart;
+   the browser still wants one click per session to re-grant write access.
+============================================================================ */
+var OUT = (function () {
+  "use strict";
+  var DB = "xxlfix", STORE = "handles", KEY = "outdir";
+  var dir = null, log = [], listeners = [], blocked = false;
+
+  function supported() { return typeof window.showDirectoryPicker === "function"; }
+
+  function idb() {
+    return new Promise(function (res, rej) {
+      var r = indexedDB.open(DB, 1);
+      r.onupgradeneeded = function () { r.result.createObjectStore(STORE); };
+      r.onsuccess = function () { res(r.result); };
+      r.onerror = function () { rej(r.error); };
+    });
+  }
+  function idbPut(v) {
+    return idb().then(function (db) {
+      return new Promise(function (res, rej) {
+        var t = db.transaction(STORE, "readwrite");
+        t.objectStore(STORE).put(v, KEY);
+        t.oncomplete = res; t.onerror = function () { rej(t.error); };
+      });
+    });
+  }
+  function idbGet() {
+    return idb().then(function (db) {
+      return new Promise(function (res, rej) {
+        var t = db.transaction(STORE, "readonly");
+        var q = t.objectStore(STORE).get(KEY);
+        q.onsuccess = function () { res(q.result || null); };
+        q.onerror = function () { rej(q.error); };
+      });
+    });
+  }
+  function idbDel() {
+    return idb().then(function (db) {
+      return new Promise(function (res) {
+        var t = db.transaction(STORE, "readwrite");
+        t.objectStore(STORE).delete(KEY);
+        t.oncomplete = res;
+      });
+    });
+  }
+
+  function note(kind, msg) {
+    var d = new Date();
+    log.unshift({ kind: kind, msg: msg,
+      t: ("0"+d.getHours()).slice(-2) + ":" + ("0"+d.getMinutes()).slice(-2) + ":" + ("0"+d.getSeconds()).slice(-2) });
+    if (log.length > 60) log.pop();
+    fire();
+  }
+  function fire() { listeners.forEach(function (fn) { try { fn(); } catch (e) {} }); }
+  function onChange(fn) { listeners.push(fn); }
+
+  function perm(handle, request) {
+    var o = { mode: "readwrite" };
+    return (request ? handle.requestPermission(o) : handle.queryPermission(o));
+  }
+
+  function pick() {
+    if (!supported()) return Promise.resolve(false);
+    return window.showDirectoryPicker({ mode: "readwrite", id: "xxlfix-out" })
+      .then(function (h) {
+        dir = h;
+        return idbPut(h).catch(function () {}).then(function () {
+          note("ok", "Aplankas pasirinktas: " + h.name);
+          return true;
+        });
+      })
+      .catch(function (e) {
+        /* Chrome refuses a fixed list of locations (drive roots, C:\Windows,
+           Program Files, ProgramData, the profile root...) and shows
+           "contains system files".  There is no override; the user cancels and
+           we land here with AbortError, so say what happened. */
+        if (e && e.name === "AbortError") {
+          note("er", "Aplankas nepasirinktas. Jei naršyklė parašė „contains system files“ — " +
+                     "Chrome neleidžia rinktis sisteminių vietų (disko šaknies, Windows, " +
+                     "Program Files, ProgramData). Žr. paaiškinimą juostoje.");
+        } else if (e && (e.name === "SecurityError" || e.name === "NotAllowedError")) {
+          note("er", "Naršyklė neleido naudoti šio aplanko (" + e.name + ").");
+        } else if (e) {
+          note("er", "Nepavyko pasirinkti aplanko: " + (e.message || e.name));
+        }
+        blocked = true; fire();
+        return false;
+      });
+  }
+
+  function restore() {
+    if (!supported()) { fire(); return Promise.resolve("unsupported"); }
+    return idbGet().then(function (h) {
+      if (!h) { fire(); return "none"; }
+      dir = h;
+      return perm(h, false).then(function (p) { fire(); return p; });
+    }).catch(function () { fire(); return "none"; });
+  }
+
+  function grant() {
+    if (!dir) return Promise.resolve("none");
+    return perm(dir, true).then(function (p) {
+      note(p === "granted" ? "ok" : "er",
+           p === "granted" ? "Prieiga prie aplanko atkurta" : "Prieiga neduota");
+      fire(); return p;
+    });
+  }
+
+  function forget() {
+    dir = null;
+    return idbDel().catch(function () {}).then(function () { note("ok", "Aplankas pamirštas"); });
+  }
+
+  function state() {
+    if (!supported()) return Promise.resolve("unsupported");
+    if (!dir) return Promise.resolve("none");
+    return perm(dir, false);
+  }
+
+  /* Write one program.  Reports whether it replaced an existing file, because
+     silently overwriting something in the machine's folder is worth seeing. */
+  function write(name, text, replaces) {
+    return state().then(function (st) {
+      if (st !== "granted") return { ok: false, reason: st };
+      var stale = (replaces && replaces !== name)
+        ? dir.removeEntry(replaces).then(function () {
+            note("ov", "pašalinta senoji  " + replaces);
+          }, function () {})
+        : Promise.resolve();
+      return stale.then(function () {
+      return dir.getFileHandle(name).then(function () { return true; },
+                                          function () { return false; })
+        .then(function (existed) {
+          return dir.getFileHandle(name, { create: true })
+            .then(function (fh) { return fh.createWritable(); })
+            .then(function (w) { return w.write(text).then(function () { return w.close(); }); })
+            .then(function () {
+              note(existed ? "ov" : "ok",
+                   (existed ? "perrašyta  " : "įrašyta    ") + name + "  →  " + dir.name);
+              return { ok: true, over: existed };
+            });
+        });
+      });
+    }).catch(function (e) {
+      note("er", "Klaida rašant " + name + ": " + (e && e.message || e));
+      return { ok: false, reason: "error", error: e };
+    });
+  }
+
+  return { supported: supported, pick: pick, restore: restore, grant: grant,
+           blocked: function () { return blocked; },
+           forget: forget, state: state, write: write, onChange: onChange,
+           log: function () { return log; }, name: function () { return dir && dir.name; } };
+})();
+</script>
+
+<script>
+/* ------------------------------ UI ------------------------------------- */
+var files = [];                       // {name, text, out, doc, dec}
+var $ = function (s) { return document.querySelector(s); };
+
+/* An old browser would render this as an unstyled mess rather than fail loudly,
+   so say so plainly instead. */
+(function () {
+  var ok = typeof Object.assign === "function" &&
+           !!document.createElement("canvas").getContext &&
+           !!(window.CSS && CSS.supports && CSS.supports("color", "var(--x)"));
+  if (ok) return;
+  var b = document.createElement("div");
+  b.setAttribute("style", "position:fixed;inset:0;z-index:999;background:#fff;color:#111;" +
+    "font:15px/1.6 sans-serif;padding:40px;text-align:center");
+  b.innerHTML = "<h2>Per sena naršyklė</h2>" +
+    "<p>Šią programą reikia atidaryti su <b>Chrome</b>, <b>Edge</b> arba <b>Firefox</b>.<br>" +
+    "Internet Explorer netinka.</p>" +
+    "<p style='color:#666'>Right-click the file &rarr; Open with &rarr; Google Chrome / Microsoft Edge.</p>";
+  document.body.appendChild(b);
+})();
+
+/* Remember the toolbar between sessions so the shop does not retype the
+   machine travel every morning.  Storage can be unavailable (locked-down
+   browser, private window) - that must never break the app. */
+/* Deliberately NOT persisted: dzOn.  Changing material thickness is a decision
+   about one job; restoring it from a previous session would quietly alter a
+   program with nothing on screen to say so. */
+var SETTINGS = ["dz", "dzPolicy", "outAuto", "outTags", "outPrefix"];
+var SETTINGS_KEY = "xxlfix.settings.v2";
+function loadSettings() {
+  var raw;
+  try { raw = localStorage.getItem(SETTINGS_KEY); } catch (e) { return; }
+  if (!raw) return;
+  var v; try { v = JSON.parse(raw); } catch (e) { return; }
+  SETTINGS.forEach(function (k) {
+    var el = $("#" + k);
+    if (!el || v[k] === undefined) return;
+    if (el.type === "checkbox") el.checked = !!v[k]; else el.value = v[k];
+  });
+  document.body.classList.toggle("dz-on", $("#dzOn").checked);
+}
+function saveSettings() {
+  var v = {};
+  SETTINGS.forEach(function (k) {
+    var el = $("#" + k); if (!el) return;
+    v[k] = el.type === "checkbox" ? el.checked : el.value;
+  });
+  try { localStorage.setItem(SETTINGS_KEY, JSON.stringify(v)); } catch (e) { /* fine */ }
+}
+
+var drop = $("#drop"), fileIn = $("#file");
+drop.addEventListener("click", function () { fileIn.click(); });
+["dragenter", "dragover"].forEach(function (e) {
+  drop.addEventListener(e, function (ev) { ev.preventDefault(); drop.classList.add("hot"); });
+});
+["dragleave", "drop"].forEach(function (e) {
+  drop.addEventListener(e, function (ev) { ev.preventDefault(); drop.classList.remove("hot"); });
+});
+drop.addEventListener("drop", function (ev) { load(ev.dataTransfer.files); });
+fileIn.addEventListener("change", function () { load(fileIn.files); fileIn.value = ""; });
+["dzOn", "dz", "dzPolicy"].forEach(function (id) {
+  $("#" + id).addEventListener("change", function () { saveSettings(); recompute(); });
+});
+loadSettings();
+
+/* ---------------- output folder ---------------- */
+var outAutoTimer = null;
+
+function outRefresh() {
+  var sup = OUT.supported();
+  $("#outPick").hidden = !sup;
+  $("#outAuto").parentNode.hidden = !sup;
+  $("#outAll").hidden = !sup;
+  if (!sup) {
+    $("#outPath").textContent = "negalima šioje naršyklėje";
+    $("#outNote").className = "hint warn";
+    $("#outNote").textContent = "Tiesioginiam įrašymui reikia Chrome arba Edge. " +
+      "Su Firefox naudokite „Atsisiųsti“ ir nustatykite naršyklės atsisiuntimų aplanką.";
+    $("#outForget").hidden = true; $("#outGrant").hidden = true;
+    return;
+  }
+  var lg = OUT.log();
+  $("#outLog").hidden = !lg.length;
+  $("#outLog").innerHTML = lg.map(function (e) {
+    return '<div><span class="t">' + e.t + '</span><span class="' + e.kind + '">' + esc(e.msg) + '</span></div>';
+  }).join("");
+
+  OUT.state().then(function (st) {
+    var nm = OUT.name();
+    $("#outPath").textContent = nm || "nepasirinktas";
+    $("#outPath").className = "path" + (nm ? "" : " none");
+    $("#outForget").hidden = !nm;
+    $("#outGrant").hidden = !(nm && st !== "granted");
+    $("#outPick").textContent = nm ? "Keisti" : "Pasirinkti aplanką";
+    var clash = !outPrefix() && $("#outTags").value !== "tag";
+    $("#outNote").className = "hint" + ((nm && st !== "granted") || clash || OUT.blocked() ? " warn" : "");
+    $("#outNote").textContent = clash
+        ? "Be priešdėlio ir be žymų vardas sutaps su originalu — tas pats failas bus perrašytas."
+      : OUT.blocked() && !nm
+        ? "Chrome neleidžia rinktis sisteminių aplankų (disko šaknies, Windows, Program Files, " +
+          "ProgramData). Žr. windows\\README.txt: pirma „1 - Leisti rasyti“, paskui arba " +
+          "„2 - Sukurti X diska“ (rašoma tiesiai į stakles), arba paprastas aplankas " +
+          "C:\\Users\\<vardas>\\CNC-OUT ir „Siusti i stakles.bat“."
+      : !nm ? "Pasirinkite aplanką, kurį skaito staklės, ir spauskite „Įrašyti“."
+      : st !== "granted" ? "Naršyklė prašo patvirtinti prieigą po paleidimo iš naujo."
+      : "";
+  });
+}
+OUT.onChange(outRefresh);
+
+$("#outPick").addEventListener("click", function () {
+  OUT.pick().then(function (ok) { outRefresh(); if (ok && $("#outAuto").checked) sendAll(true); });
+});
+$("#outForget").addEventListener("click", function () { OUT.forget().then(outRefresh); });
+$("#outGrant").addEventListener("click", function () {
+  OUT.grant().then(function () { outRefresh(); if ($("#outAuto").checked) sendAll(true); });
+});
+$("#outAuto").addEventListener("change", function () {
+  saveSettings(); drawerBadge();
+  if ($("#outAuto").checked) sendAll(true);
+});
+["outTags", "outPrefix"].forEach(function (id) {
+  $("#" + id).addEventListener("input", function () {
+    saveSettings(); drawerBadge(); outRefresh(); render();
+  });
+});
+
+/* Name used when writing into the CNC folder.  Default is the original file
+   name: the machine looks for a part by its own name, and suffixed variants
+   sitting next to it are just a chance to load the wrong one. */
+function sendName(f) { return outName(f.name, f); }
+
+/* Send everything whose output changed since it was last written.  Debounced,
+   so a burst of nudges lands as one write rather than twenty. */
+function sendAll(onlyChanged) {
+  if (!OUT.supported()) return;
+  OUT.state().then(function (st) {
+    if (st !== "granted") { outRefresh(); return; }
+    var q = files.filter(function (f) {
+      if (!f.out) return false;
+      if (!onlyChanged) return true;
+      return f.sentText !== f.out || f.sentName !== sendName(f);
+    });
+    (function next(i) {
+      if (i >= q.length) { render(); return; }
+      var f = q[i], nm = sendName(f);
+      OUT.write(nm, f.out, f.sentName).then(function (r) {
+        if (r.ok) { f.sentText = f.out; f.sentName = nm; f.sentAt = Date.now(); }
+        next(i + 1);
+      });
+    })(0);
+  });
+}
+function autoSend() {
+  if (!$("#outAuto").checked || !OUT.supported()) return;
+  clearTimeout(outAutoTimer);
+  outAutoTimer = setTimeout(function () { sendAll(true); }, 1200);
+}
+$("#outAll").addEventListener("click", function () { sendAll(false); });
+OUT.restore().then(outRefresh);
+$("#dzOn").addEventListener("change", function () {
+  document.body.classList.toggle("dz-on", $("#dzOn").checked);
+});
+$("#dlall").addEventListener("click", downloadAll);
+$("#drawerToggle").addEventListener("click", function () {
+  $("#drawer").classList.toggle("open");
+});
+
+function load(fl) {
+  var arr = Array.prototype.slice.call(fl);
+  var pend = arr.length;
+  if (!pend) return;
+  arr.forEach(function (f) {
+    var r = new FileReader();
+    r.onload = function () {
+      var doc = XXL.parse(r.result);
+      files.push({
+        name: f.name, text: r.result,
+        rot: doc.DY > doc.DX ? 1 : 0,          // the only reason this app gets opened
+        view: "2d", skip: {}, edits: {}, sel: {}
+      });
+      if (--pend === 0) recompute();
+    };
+    r.readAsText(f, "utf-8");
+  });
+}
+
+/* Operations are addressed by their stable program-order index, never by line
+   number: transform() inserts a stamp line, which would shift line indices. */
+function redraw() {
+  keepScroll(recompute);
+  V3D.refresh();
+}
+function toggleOp(f, id) {
+  if (!f) return;
+  if (!f.skip) f.skip = {};
+  if (f.skip[id]) delete f.skip[id]; else f.skip[id] = 1;
+  redraw();
+}
+function selectOp(f, id, add) {
+  if (!f) return;
+  if (!f.sel) f.sel = {};
+  if (add) { if (f.sel[id]) delete f.sel[id]; else f.sel[id] = 1; }
+  else { var only = !!f.sel[id] && Object.keys(f.sel).length === 1; f.sel = {}; if (!only) f.sel[id] = 1; }
+  redraw();
+}
+window.selectOp = selectOp;
+
+function editOf(f, id) {
+  if (!f.edits) f.edits = {};
+  if (!f.edits[id]) f.edits[id] = {};
+  return f.edits[id];
+}
+function nudge(f, key, amount) {
+  Object.keys(f.sel || {}).forEach(function (id) {
+    var e = editOf(f, +id);
+    e[key] = (e[key] || 0) + amount;
+  });
+  redraw();
+}
+function setAbs(f, id, key, target, current) {
+  var e = editOf(f, id);
+  e[key] = (e[key] || 0) + (target - current);
+  redraw();
+}
+function clearEdits(f) {
+  Object.keys(f.sel || {}).forEach(function (id) { delete f.edits[id]; });
+  redraw();
+}
+function hasEdit(f, id) {
+  var e = f.edits && f.edits[id];
+  return !!(e && (e.dx || e.dy || e.ds || e.dt || e.dz || e.d != null));
+}
+
+/* Anything that changes the output must be visible with the drawer shut. */
+function drawerBadge() {
+  var on = [];
+  if ($("#dzOn").checked) on.push("storis → " + $("#dz").value + " mm");
+  if (outPrefix() !== "NEW_") on.push("priešdėlis „" + (outPrefix() || "–") + "“");
+  if ($("#outTags").value === "tag") on.push("vardas su žymomis");
+  if ($("#outAuto").checked) on.push("įrašo automatiškai");
+  $("#drawerBadge").innerHTML = on.length
+    ? '<span class="on">⚠ ' + esc(on.join(" · ")) + '</span>' : "";
+}
+
+function recompute() {
+  var dzOn = $("#dzOn").checked, newDZ = +$("#dz").value, policy = $("#dzPolicy").value;
+  document.body.classList.toggle("dz-on", dzOn);
+  drawerBadge();
+
+  files.forEach(function (f) {
+    var doc = XXL.parse(f.text);
+    var wantDZ = dzOn && newDZ > 0 && Math.abs(newDZ - doc.DZ) > 1e-9 && !doc.errors.length;
+    f.doc = doc; f.dzChange = wantDZ;
+    f.notes = []; f.warn = [];
+    if (!f.skip) f.skip = {};
+    if (!f.edits) f.edits = {};
+    if (!f.sel) f.sel = {};
+
+    var nOps = doc.holes.length + doc.paths.length;
+    [f.skip, f.sel, f.edits].forEach(function (m) {
+      Object.keys(m).forEach(function (k) { if (+k >= nOps) delete m[k]; });
+    });
+    var skipIds = Object.keys(f.skip).filter(function (k) { return f.skip[k]; }).map(Number);
+    f.skipCount = skipIds.length;
+    f.editCount = Object.keys(f.edits).filter(function (k) { return hasEdit(f, k); }).length;
+
+    /* f.out is the file to download; f.viewDoc is what the screen shows - it
+       keeps every operation so program-order indices still line up with
+       f.skip / f.sel / f.edits. */
+    if (f.rot || wantDZ || skipIds.length || f.editCount) {
+      var base = { rot: f.rot || 0, dz: wantDZ ? newDZ : null, policy: policy, edits: f.edits };
+      var r = XXL.transform(f.text, Object.assign({}, base, { skip: skipIds }));
+      if (r.ok) {
+        f.out = r.text; f.outDoc = XXL.parse(r.text);
+        f.notes = r.notes; f.warn = r.warnings;
+      } else { f.out = null; f.outDoc = null; f.warn = r.warnings || []; }
+      var v = XXL.transform(f.text, base);
+      f.viewDoc = v.ok ? XXL.parse(v.text) : doc;
+    } else { f.out = null; f.outDoc = null; f.viewDoc = doc; }
+  });
+  render();
+  autoSend();
+}
+
+function opLabel(op) {
+  if (op.kind === "route")
+    return 'frezavimas  ' + (op.d ? '⌀' + op.d + '  ' : '') + op.n + ' tšk.  ' + Math.round(op.len) + ' mm';
+  var FN = {1:"viršus F1", 2:"kairė F2", 3:"dešinė F3", 4:"priekis F4", 5:"galas F5", 6:"apačia F6"};
+  return 'gręžimas ⌀' + op.d + '  ' + (FN[op.face] || ("F" + op.face)) +
+         '  X' + rnd(op.x) + ' Y' + rnd(op.y) + (op.edge ? ' t' + rnd(op.t) : '') + '  Z' + op.z;
+}
+function rnd(v) { return Math.round(v * 10) / 10; }
+
+function opsHTML(f, idx) {
+  var ops = XXL.operations(f.viewDoc || f.doc);
+  if (!ops.length) return "";
+  f.ops = ops;
+  var off = ops.filter(function (o) { return f.skip[o.id]; }).length;
+
+  var dias = {}, faces = {};
+  ops.forEach(function (o) {
+    if (o.kind === "bore") { dias[o.d] = (dias[o.d]||0)+1; faces[o.face] = (faces[o.face]||0)+1; }
+  });
+  var chips = Object.keys(dias).sort(function(a,b){return a-b;}).map(function (k) {
+      return '<button class="grp" data-g="d:' + k + '" data-i="' + idx + '">⌀' + k + ' (' + dias[k] + ')</button>';
+    }).concat(Object.keys(faces).sort().map(function (k) {
+      return '<button class="grp" data-g="f:' + k + '" data-i="' + idx + '">F' + k + ' (' + faces[k] + ')</button>';
+    }));
+  if (ops.some(function (o) { return o.kind === "route"; }))
+    chips.push('<button class="grp" data-g="r:1" data-i="' + idx + '">frezavimas</button>');
+
+  return '<div class="ops' + (off ? ' open' : '') + '" data-ops="' + idx + '">' +
+    '<div class="head" data-toggle="' + idx + '">' +
+      '<span class="ttl">▾ Operacijos — ką daryti</span>' +
+      '<span class="cnt">' + (ops.length - off) + ' iš ' + ops.length +
+        (off ? '  <b>praleista ' + off + '</b>' : '') + '</span>' +
+    '</div>' +
+    '<div class="body">' +
+      '<div class="tools">' +
+        '<button data-s="all" data-i="' + idx + '">Visi</button>' +
+        '<button data-s="none" data-i="' + idx + '">Nė vieno</button>' +
+        '<button data-s="inv" data-i="' + idx + '">Invertuoti</button>' +
+        chips.join('') +
+      '</div>' +
+      '<div class="list">' + ops.map(function (o) {
+        var on = !f.skip[o.id], sel = !!(f.sel && f.sel[o.id]);
+        return '<div class="row' + (on ? '' : ' off') + (sel ? ' sel' : '') +
+            '" data-op="' + o.id + '" data-i="' + idx + '">' +
+          '<input type="checkbox" data-chk="1"' + (on ? ' checked' : '') + '>' +
+          '<span class="ix">' + (o.id + 1) + '</span>' +
+          '<span class="txt">' + esc(opLabel(o)) +
+            (hasEdit(f, o.id) ? '  <span style="color:var(--pick)">✎</span>' : '') + '</span></div>';
+      }).join('') + '</div>' +
+    '</div></div>';
+}
+
+/* Editor for the selected hole(s).  Values shown are the FINAL program's
+   coordinates, so what you type is what the machine gets. */
+function editHTML(f, idx) {
+  var ids = Object.keys(f.sel || {}).filter(function (k) { return f.sel[k]; }).map(Number);
+  if (!ids.length) return "";
+  var byId = {}; XXL.operations(f.viewDoc || f.doc).forEach(function (o) { byId[o.id] = o; });
+  var one = ids.length === 1 ? byId[ids[0]] : null;
+  var edited = ids.filter(function (i) { return hasEdit(f, i); }).length;
+
+  function steps(key) {
+    return [-5,-2,-1,-0.5,0.5,1,2,5].map(function (v) {
+      return '<button data-nu="' + idx + '" data-k="' + key + '" data-v="' + v + '">' +
+             (v > 0 ? "+" : "") + v + '</button>';
+    }).join("");
+  }
+  function axis(label, key, val, unit) {
+    var d = 0;
+    ids.forEach(function (i) { var e = f.edits[i]; if (e && e[key]) d += e[key]; });
+    d = ids.length ? d/ids.length : 0;
+    return '<div class="ax"><span class="lbl">' + label + '</span>' +
+      (val == null ? '' : '<input type="number" step="0.1" value="' + val +
+        '" data-abs="' + idx + '" data-k="' + key + '" data-cur="' + val + '">') +
+      '<span class="nudge">' + steps(key) + '</span>' +
+      (Math.abs(d) > 1e-9 ? '<span class="dlt">' + (d > 0 ? "+" : "") + Math.round(d*1000)/1000 + ' ' + (unit||"mm") + '</span>' : '') +
+      '</div>';
+  }
+
+  /* Which axes exist depends on the face, so a mixed selection has no common
+     in-plane axis - offering one would silently do nothing. */
+  var sels = ids.map(function (i) { return byId[i]; }).filter(Boolean);
+  var bores = sels.filter(function (o) { return o.kind === "bore"; });
+  var allEdge = bores.length === sels.length && bores.length &&
+                bores.every(function (o) { return o.face >= 2 && o.face <= 5; });
+  var allFlat = bores.length === sels.length && bores.length &&
+                bores.every(function (o) { return o.face === 1 || o.face === 6; });
+
+  var rows = "";
+  if (allEdge) {
+    rows += axis("Pagal briauną", "ds", one ? rnd(one.face === 2 || one.face === 3 ? one.y : one.x) : null);
+    rows += axis("Storyje", "dt", one ? rnd(one.t) : null);
+    rows += axis("Gylis Z", "dz", one ? one.z : null);
+  } else if (allFlat) {
+    rows += axis("X", "dx", one ? rnd(one.x) : null);
+    rows += axis("Y", "dy", one ? rnd(one.y) : null);
+    rows += axis("Gylis Z", "dz", one ? one.z : null);
+  } else if (bores.length) {
+    rows += '<div class="ax"><span class="lbl" style="width:auto;color:var(--warn)">' +
+      'Pažymėtos skirtingų plokštumų operacijos — bendrai galima keisti tik gylį.</span></div>';
+    rows += axis("Gylis Z", "dz", null);
+  } else {
+    rows += '<div class="ax"><span class="lbl" style="width:auto">Frezavimo kelio koordinatės nekeičiamos — galima tik praleisti.</span></div>';
+  }
+
+  var FN = {1:"viršus F1",2:"kairė F2",3:"dešinė F3",4:"priekis F4",5:"galas F5",6:"apačia F6"};
+  return '<div class="ed">' +
+    '<div class="top">' +
+      '<span class="tag">' + (one ? "Operacija " + (one.id+1) : ids.length + " operacijos pažymėtos") + '</span>' +
+      (one ? '<span class="sub">' + esc(one.kind === "route" ? "frezavimas" :
+        "gręžimas ⌀" + one.d + "  " + (FN[one.face] || ("F"+one.face))) + '</span>' : '') +
+      (edited ? '<span class="sub" style="color:var(--pick)">pataisyta: ' + edited + '</span>' : '') +
+    '</div>' + rows +
+    '<div class="acts">' +
+      (edited ? '<button class="ghost" data-clr="' + idx + '">Atstatyti pradines</button>' : '') +
+      (function () {
+        var allOff = ids.every(function (i) { return f.skip[i]; });
+        var what = ids.length === 1
+          ? "šios operacijos"
+          : "pažymėtų operacijų (" + ids.length + ")";
+        return '<button class="skipbtn' + (allOff ? ' undo' : '') + '" data-skipsel="' + idx + '">' +
+          (allOff ? '↩ Grąžinti į programą' : '✕ Nedaryti ' + what) + '</button>';
+      })() +
+      '<button class="ghost" data-desel="' + idx + '">Nuimti žymėjimą</button>' +
+    '</div></div>';
+}
+
+function render() {
+  files.forEach(function (f) { if (f._v3) { f._v3.play(false); f._v3 = null; } });
+  var list = $("#list"); list.innerHTML = "";
+
+  document.body.classList.toggle("has-files", files.length > 0);
+  files.forEach(function (f, idx) {
+    var d = f.doc, o = f.viewDoc || f.doc;
+    var card = document.createElement("div"); card.className = "card";
+    var deg = (f.rot || 0) * 90;
+
+    card.innerHTML =
+      '<div class="chead">' +
+        '<div class="nm">' + esc(f.name) + '</div>' +
+        '<div class="dim">' +
+          (deg || f.dzChange ? '<s>' + d.DX + '×' + d.DY + '×' + d.DZ + '</s> ' : '') +
+          '<b>' + o.DX + ' × ' + o.DY + ' × ' + o.DZ + '</b> mm' +
+        '</div>' +
+        '<div class="grow"></div>' +
+        '<div class="rotbox">' +
+          '<button class="rot" data-rot="' + idx + '">⟳ Pasukti 90°</button>' +
+          '<span class="ang' + (deg ? ' on' : '') + '">' + deg + '°</span>' +
+        '</div>' +
+        (OUT.supported() && OUT.name()
+          ? '<button class="ghost" data-send="' + idx + '">Į stakles</button>' : '') +
+        '<button class="dl" data-dl="' + idx + '">Atsisiųsti</button>' +
+        '<button class="x" data-rm="' + idx + '" title="Šalinti">✕</button>' +
+      '</div>' +
+
+      '<div class="stage">' +
+        '<div class="tabs">' +
+          '<button class="' + (f.view !== "3d" ? "sel" : "") + '" data-view="' + idx + '" data-v="2d">2D</button>' +
+          '<button class="' + (f.view === "3d" ? "sel" : "") + '" data-view="' + idx + '" data-v="3d">3D</button>' +
+        '</div>' +
+        '<canvas data-cv="' + idx + 'a"' + (f.view === "3d" ? ' hidden' : '') + '></canvas>' +
+        '<canvas data-cv3="' + idx + '"' + (f.view === "3d" ? '' : ' hidden') + '></canvas>' +
+        '<div class="tip">Spustelėkite gręžinį — galėsite jį pastumti arba praleisti</div>' +
+      '</div>' +
+      (f.view === "3d"
+        ? '<div class="playbar">' +
+            '<button class="play" data-play="' + idx + '">▶ Leisti</button>' +
+            '<button class="ghost" data-stop="' + idx + '" title="Nuo pradžių">⟲</button>' +
+            '<input type="range" data-scrub="' + idx + '" min="0" max="1000" value="0">' +
+            '<span class="pos" data-pos="' + idx + '"></span>' +
+            '<span class="lbl">Greitis</span>' +
+            '<input type="range" class="spd" data-spd="' + idx + '" min="1" max="60" value="18">' +
+          '</div>'
+        : '') +
+
+      editHTML(f, idx) +
+      opsHTML(f, idx) +
+      changeHTML(f) +
+      noteHTML(d, f.warn || []) +
+      (f.sentName ? '<div class="sentrow"><span class="sent' + (f.sentText === f.out ? '' : ' stale') + '">' +
+         (f.sentText === f.out ? '✓ įrašyta į stakles: ' : '⚠ pakeista po įrašymo: ') +
+         esc(f.sentName) + '</span></div>' : '');
+
+    list.appendChild(card);
+    var c2 = card.querySelector('[data-cv="' + idx + 'a"]');
+    requestAnimationFrame(function () { drawPanel(c2, o, f); });
+  });
+
+  wireCards(list);
+  $("#allrow").hidden = files.length < 2;
+  $("#outAll").hidden = !(OUT.supported() && OUT.name());
+}
+
+
+function changeHTML(f) {
+  if (!f.out || !f.notes || !f.notes.length) return "";
+  return '<div class="notes"><b>Pakeitimai:</b> ' +
+    f.notes.map(esc).join(' &middot; ') + '</div>';
+}
+
+/* where side holes sit through the thickness, before -> after */
+function edgeThickness(d) {
+  var e = d.holes.filter(function (h) { return h.edge && isFinite(h.t); });
+  if (!e.length) return null;
+  var vals = {}; e.forEach(function (h) { vals[h.t] = (vals[h.t] || 0) + 1; });
+  return { n: e.length, keys: Object.keys(vals).sort(function (a, b) { return a - b; }), vals: vals };
+}
+function noteHTML(d, extra) {
+  var out = [];
+  (d.errors || []).forEach(function (e) { out.push('<span class="e">&#9888; ' + esc(e) + '</span>'); });
+  var ws = (d.warnings || []).concat(extra || []);
+  ws.slice(0, 5).forEach(function (w) { out.push('<span class="w">&#9888; ' + esc(w) + '</span>'); });
+  if (ws.length > 5) out.push('<span class="w">…dar ' + (ws.length - 5) + ' įspėjim.</span>');
+  return out.length ? '<div class="note">' + out.join("<br>") + '</div>' : '';
+}
+
+/* ---- drawing ---- */
+function drawPanel(cv, d, f) {
+  if (!cv) return;
+  var skip = (f && f.skip) || {}, sel = (f && f.sel) || {};
+  var dpr = Math.min(2, window.devicePixelRatio || 1);
+  var W = cv.clientWidth || 900, H = cv.clientHeight || 380;
+  if (cv.width !== Math.round(W * dpr) || cv.height !== Math.round(H * dpr)) {
+    cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr);
+  }
+  var g = cv.getContext("2d");
+  g.setTransform(dpr, 0, 0, dpr, 0, 0);
+  g.fillStyle = PAL.bg; g.fillRect(0, 0, W, H);
+  if (!(d.DX > 0 && d.DY > 0)) return;
+
+  var pad = 56;
+  var sc = Math.min((W - 2 * pad) / d.DX, (H - 2 * pad) / d.DY);
+  var ox = (W - d.DX * sc) / 2, oy = (H + d.DY * sc) / 2;
+  function px(x) { return ox + x * sc; }
+  function py(y) { return oy - y * sc; }
+
+  // panel
+  g.fillStyle = PAL.fill; g.strokeStyle = PAL.edge; g.lineWidth = 2;
+  g.fillRect(px(0), py(d.DY), d.DX * sc, d.DY * sc);
+  g.strokeRect(px(0), py(d.DY), d.DX * sc, d.DY * sc);
+
+  // routing
+  g.lineWidth = 2;
+  d.paths.forEach(function (p) {
+    var pts = p.pts.filter(function (q) { return isFinite(q[0]) && isFinite(q[1]); });
+    if (pts.length < 2) return;
+    var offp = !!skip[p.op];
+    g.strokeStyle = offp ? PAL.off : PAL.feed;
+    g.setLineDash(offp ? [4, 4] : []);
+    g.beginPath(); g.moveTo(px(pts[0][0]), py(pts[0][1]));
+    for (var i = 1; i < pts.length; i++) g.lineTo(px(pts[i][0]), py(pts[i][1]));
+    g.stroke(); g.setLineDash([]);
+  });
+
+  // holes
+  var hits = [];
+  d.holes.forEach(function (h) {
+    if (!isFinite(h.x) || !isFinite(h.y)) return;
+    var r = Math.max(4, (h.d / 2) * sc), X = px(h.x), Y = py(h.y);
+    hits.push({ id: h.op, x: X, y: Y });
+    if (sel[h.op]) {
+      g.strokeStyle = PAL.sel; g.lineWidth = 2.5;
+      g.beginPath(); g.arc(X, Y, r + 7, 0, 6.2832); g.stroke();
+    }
+    g.beginPath();
+    if (skip[h.op]) {
+      g.strokeStyle = PAL.off; g.lineWidth = 2;
+      g.arc(X, Y, r, 0, 6.2832); g.stroke();
+      var q = r + 1;
+      g.beginPath(); g.moveTo(X - q, Y - q); g.lineTo(X + q, Y + q);
+      g.moveTo(X + q, Y - q); g.lineTo(X - q, Y + q); g.stroke();
+    } else {
+      g.fillStyle = h.edge ? PAL.holeSide : PAL.holeTop;
+      g.arc(X, Y, r, 0, 6.2832); g.fill();
+    }
+  });
+  cv._hits = hits; cv._file = f;
+
+  // origin + dimensions
+  g.strokeStyle = PAL.origin; g.lineWidth = 2;
+  g.beginPath(); g.moveTo(px(0), py(0)); g.lineTo(px(0) + 34, py(0)); g.stroke();
+  g.beginPath(); g.moveTo(px(0), py(0)); g.lineTo(px(0), py(0) - 34); g.stroke();
+  g.fillStyle = PAL.origin; g.font = "600 15px ui-monospace,monospace";
+  g.fillText("X", px(0) + 38, py(0) + 5);
+  g.fillText("Y", px(0) - 6, py(0) - 40);
+  g.beginPath(); g.arc(px(0), py(0), 4, 0, 6.2832); g.fill();
+
+  g.fillStyle = PAL.label; g.font = "15px ui-monospace,monospace";
+  var lx = d.DX + " mm";
+  g.fillText(lx, px(d.DX / 2) - g.measureText(lx).width / 2, py(d.DY) - 16);
+  g.save();
+  g.translate(px(d.DX) + 22, py(d.DY / 2));
+  g.rotate(-Math.PI / 2);
+  var ly = d.DY + " mm";
+  g.fillText(ly, -g.measureText(ly).width / 2, 0);
+  g.restore();
+}
+
+/* ---- per-card wiring ------------------------------------------------- */
+function wireCards(list) {
+  function fileOf(b, key) { return files[+b.dataset[key]]; }
+
+  list.querySelectorAll("[data-rot]").forEach(function (b) {
+    b.addEventListener("click", function () {
+      var f = fileOf(b, "rot");
+      f.rot = ((f.rot || 0) + 1) % 4;
+      keepScroll(recompute);
+    });
+  });
+  list.querySelectorAll("[data-dl]").forEach(function (b) {
+    b.addEventListener("click", function () { save(fileOf(b, "dl")); });
+  });
+  list.querySelectorAll("[data-rm]").forEach(function (b) {
+    b.addEventListener("click", function () { files.splice(+b.dataset.rm, 1); recompute(); });
+  });
+  list.querySelectorAll("[data-send]").forEach(function (b) {
+    b.addEventListener("click", function () {
+      var f = fileOf(b, "send"), nm = sendName(f);
+      if (!f.out) return;
+      OUT.write(nm, f.out, f.sentName).then(function (r) {
+        if (r.ok) { f.sentText = f.out; f.sentName = nm; f.sentAt = Date.now(); }
+        keepScroll(render);
+      });
+    });
+  });
+  list.querySelectorAll("[data-view]").forEach(function (b) {
+    b.addEventListener("click", function () {
+      var f = fileOf(b, "view");
+      f.view = b.dataset.v;
+      keepScroll(render);
+    });
+  });
+
+  // 2D: click a hole to select it
+  list.querySelectorAll("[data-cv]").forEach(function (cv) {
+    cv.addEventListener("click", function (ev) {
+      if (!cv._hits || !cv._file) return;
+      var r = cv.getBoundingClientRect();
+      var mx = ev.clientX - r.left, my = ev.clientY - r.top;
+      var best = null, bd = 22;
+      cv._hits.forEach(function (h) {
+        var dd = Math.hypot(h.x - mx, h.y - my);
+        if (dd < bd) { bd = dd; best = h.id; }
+      });
+      if (best != null) selectOp(cv._file, best, ev.ctrlKey || ev.metaKey || ev.shiftKey);
+    });
+  });
+
+  // 3D: only built when its tab is open
+  list.querySelectorAll("[data-cv3]").forEach(function (cv) {
+    var i = +cv.dataset.cv3, f = files[i];
+    if (cv.hidden) return;
+    var vw = V3D.create(cv, { table: false });
+    vw.setScene(V3D.build(f.viewDoc || f.doc, f.skip, f.sel));
+    vw.onPick = function (id, add) { selectOp(f, id, add); };
+    f._v3 = vw;
+
+    var play  = list.querySelector('[data-play="' + i + '"]');
+    var scrub = list.querySelector('[data-scrub="' + i + '"]');
+    var pos   = list.querySelector('[data-pos="' + i + '"]');
+    function sync() {
+      if (!scrub) return;
+      var S = vw.scene;
+      scrub.value = S.total ? Math.round(vw.anim.s / S.total * 1000) : 0;
+      pos.textContent = Math.round(vw.anim.s) + " / " + Math.round(S.total) + " mm";
+      play.textContent = vw.anim.playing ? "⏸ Stabdyti" : "▶ Leisti";
+    }
+    vw.onFrame = sync;
+    vw.onStop = sync;
+    if (play) play.addEventListener("click", function () { vw.play(!vw.anim.playing); sync(); });
+    var stop = list.querySelector('[data-stop="' + i + '"]');
+    if (stop) stop.addEventListener("click", function () {
+      vw.anim.s = 0; vw.play(false); sync(); vw.render();
+    });
+    if (scrub) scrub.addEventListener("input", function () {
+      vw.anim.s = vw.scene.total * scrub.value / 1000;
+      vw.play(false); sync(); vw.render();
+    });
+    var spd = list.querySelector('[data-spd="' + i + '"]');
+    if (spd) spd.addEventListener("input", function () { vw.anim.speed = +spd.value; });
+
+    requestAnimationFrame(function () { vw.render(); sync(); });
+  });
+
+  // operations list
+  list.querySelectorAll("[data-toggle]").forEach(function (h) {
+    h.addEventListener("click", function () { h.parentNode.classList.toggle("open"); });
+  });
+  list.querySelectorAll(".ops .row").forEach(function (r) {
+    r.addEventListener("click", function (ev) {
+      var f = files[+r.dataset.i], id = +r.dataset.op;
+      if (ev.target.dataset && ev.target.dataset.chk) { ev.preventDefault(); toggleOp(f, id); }
+      else selectOp(f, id, ev.ctrlKey || ev.metaKey || ev.shiftKey);
+    });
+  });
+  list.querySelectorAll(".ops .tools button").forEach(function (b) {
+    b.addEventListener("click", function () {
+      var f = files[+b.dataset.i], ops = f.ops || [];
+      if (b.dataset.s === "all") ops.forEach(function (o) { delete f.skip[o.id]; });
+      else if (b.dataset.s === "none") ops.forEach(function (o) { f.skip[o.id] = 1; });
+      else if (b.dataset.s === "inv") ops.forEach(function (o) {
+        if (f.skip[o.id]) delete f.skip[o.id]; else f.skip[o.id] = 1;
+      });
+      else if (b.dataset.g) {
+        var g = b.dataset.g.split(":"), sel = ops.filter(function (o) {
+          if (g[0] === "d") return o.kind === "bore" && String(o.d) === g[1];
+          if (g[0] === "f") return o.kind === "bore" && String(o.face) === g[1];
+          return o.kind === "route";
+        });
+        var anyOn = sel.some(function (o) { return !f.skip[o.id]; });
+        sel.forEach(function (o) { if (anyOn) f.skip[o.id] = 1; else delete f.skip[o.id]; });
+      }
+      keepScroll(recompute);
+    });
+  });
+
+  // hole editor
+  list.querySelectorAll("[data-nu]").forEach(function (b) {
+    b.addEventListener("click", function () { nudge(files[+b.dataset.nu], b.dataset.k, +b.dataset.v); });
+  });
+  list.querySelectorAll("[data-abs]").forEach(function (inp) {
+    inp.addEventListener("change", function () {
+      var f = files[+inp.dataset.abs];
+      var ids = Object.keys(f.sel || {}).filter(function (k) { return f.sel[k]; }).map(Number);
+      if (ids.length !== 1 || inp.value === "") return;
+      setAbs(f, ids[0], inp.dataset.k, parseFloat(inp.value), parseFloat(inp.dataset.cur));
+    });
+  });
+  list.querySelectorAll("[data-clr]").forEach(function (b) {
+    b.addEventListener("click", function () { clearEdits(files[+b.dataset.clr]); });
+  });
+  list.querySelectorAll("[data-desel]").forEach(function (b) {
+    b.addEventListener("click", function () { files[+b.dataset.desel].sel = {}; keepScroll(recompute); });
+  });
+  list.querySelectorAll("[data-skipsel]").forEach(function (b) {
+    b.addEventListener("click", function () {
+      var f = files[+b.dataset.skipsel];
+      var ids = Object.keys(f.sel || {}).filter(function (k) { return f.sel[k]; }).map(Number);
+      var allOff = ids.every(function (i) { return f.skip[i]; });
+      ids.forEach(function (i) { if (allOff) delete f.skip[i]; else f.skip[i] = 1; });
+      keepScroll(recompute);
+    });
+  });
+}
+
+function keepScroll(fn) {
+  var y = window.scrollY;
+  fn();
+  window.scrollTo(0, y);
+}
+
+/* ---- download ---- */
+/* The downloaded file and the file written into the CNC folder must carry the
+   same name - two different names for the same program is how the wrong one
+   ends up on the machine. */
+function outPrefix() {
+  return ($("#outPrefix") ? $("#outPrefix").value : "NEW_").replace(/[\\/:*?"<>|]/g, "");
+}
+function outName(n, f) {
+  var m = /\.(xxl)$/i.exec(n);
+  var base = m ? n.slice(0, -m[0].length) : n;
+  var ext = m ? m[0] : ".XXL";
+  var tag = "";
+  if (f && $("#outTags") && $("#outTags").value === "tag") {
+    if (f.rot) tag += "_X";
+    if (f.dzChange && f.outDoc) tag += "_" + f.outDoc.DZ + "mm";
+    if (f.skipCount) tag += "_SEL";
+    if (f.editCount) tag += "_ED";
+  }
+  return outPrefix() + base + tag + ext;
+}
+function save(f) {
+  if (!f || !f.out) return;
+  var b = new Blob([f.out], { type: "text/plain;charset=utf-8" });
+  var a = document.createElement("a");
+  a.href = URL.createObjectURL(b); a.download = outName(f.name, f);
+  document.body.appendChild(a); a.click();
+  setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 500);
+}
+function downloadAll() {
+  var q = files.filter(function (f) { return f.out; });
+  q.forEach(function (f, i) { setTimeout(function () { save(f); }, i * 320); });
+}
+function esc(s) {
+  return String(s).replace(/[&<>"]/g, function (c) {
+    return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c];
+  });
+}
+</script>
+
+
+
+<script id="v3d-core">
+/* ============================================================================
+   Dependency-free 3D: orbit camera + painter's-algorithm canvas renderer.
+   Viewer is a factory, so the same engine drives both the inline card views
+   and the full-screen window.
+
+   Panel space: X 0..DX, Y 0..DY, Z 0..DZ with Z=0 the face lying on the table.
+   Program Z is measured down from the TOP face, so panelZ = DZ + progZ.
+============================================================================ */
+var V3D = (function () {
+  "use strict";
+  var SEG = 12, NEAR = 30;
+
+  function sub(a,b){return [a[0]-b[0],a[1]-b[1],a[2]-b[2]];}
+  function dot(a,b){return a[0]*b[0]+a[1]*b[1]+a[2]*b[2];}
+  function cross(a,b){return [a[1]*b[2]-a[2]*b[1],a[2]*b[0]-a[0]*b[2],a[0]*b[1]-a[1]*b[0]];}
+  function len(a){return Math.sqrt(dot(a,a));}
+  function norm(a){var l=len(a)||1;return [a[0]/l,a[1]/l,a[2]/l];}
+  function add(a,b){return [a[0]+b[0],a[1]+b[1],a[2]+b[2]];}
+  function mul(a,k){return [a[0]*k,a[1]*k,a[2]*k];}
+  function lerp(a,b,t){return [a[0]+(b[0]-a[0])*t,a[1]+(b[1]-a[1])*t,a[2]+(b[2]-a[2])*t];}
+  function esc3(x){return String(x).replace(/[&<>]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;"}[c];});}
+
+  /* ---------------- scene ---------------- */
+  function holeAxis(h, DX, DY, DZ) {
+    var depth = Math.abs(h.z || 0);
+    switch (h.face) {
+      case 1: return { p: [h.x, h.y, DZ], dir: [0,0,-1], depth: depth };
+      case 6: return { p: [h.x, h.y, 0],  dir: [0,0, 1], depth: depth };
+      case 2: return { p: [0,  h.y, h.t], dir: [ 1,0,0], depth: depth };
+      case 3: return { p: [DX, h.y, h.t], dir: [-1,0,0], depth: depth };
+      case 4: return { p: [h.x, 0,  h.t], dir: [0, 1,0], depth: depth };
+      case 5: return { p: [h.x, DY, h.t], dir: [0,-1,0], depth: depth };
+    }
+    return null;
+  }
+
+  function arcPts(a, b, i, j, gdir) {
+    var r = Math.hypot(a[0]-i, a[1]-j);
+    var a0 = Math.atan2(a[1]-j, a[0]-i), a1 = Math.atan2(b[1]-j, b[0]-i);
+    var ccw = gdir === 3, d = a1 - a0;
+    while (ccw && d <= 0) d += 2*Math.PI;
+    while (!ccw && d >= 0) d -= 2*Math.PI;
+    var n = Math.max(4, Math.ceil(Math.abs(d) / 0.22)), o = [];
+    for (var k = 1; k <= n; k++) {
+      var t = a0 + d*k/n;
+      o.push([i + r*Math.cos(t), j + r*Math.sin(t), a[2] + (b[2]-a[2])*k/n]);
+    }
+    return o;
+  }
+
+  /* skip = object keyed by op id; skipped work is kept in the scene but marked,
+     so the view can show exactly what will be left out. */
+  function build(doc, skip, sel) {
+    skip = skip || {}; sel = sel || {};
+    var DX = doc.DX, DY = doc.DY, DZ = doc.DZ || 18;
+    var clear = DZ + (doc.zfast != null ? doc.zfast : 20);
+    var holes = [], moves = [], ops = [];
+
+    doc.holes.forEach(function (h) {
+      var a = holeAxis(h, DX, DY, DZ);
+      if (!a) return;
+      holes.push({ p0: a.p, p1: add(a.p, mul(a.dir, a.depth)), d: h.d || 5,
+                   dir: a.dir, face: h.face, id: h.op, z: h.z,
+                   mid: lerp(a.p, add(a.p, mul(a.dir, a.depth)), 0.5),
+                   off: !!skip[h.op], sel: !!sel[h.op] });
+      if (!skip[h.op]) ops.push({ line: h.line, kind: "bore", h: h, ax: a });
+    });
+    doc.paths.forEach(function (p) { if (!skip[p.op]) ops.push({ line: p.line, kind: "path", p: p }); });
+    ops.sort(function (a, b) { return a.line - b.line; });
+
+    var pathLines = doc.paths.map(function (p) {
+      return { id: p.op, off: !!skip[p.op], sel: !!sel[p.op],
+               pts: p.pts.filter(function (q) { return isFinite(q[0]) && isFinite(q[1]); })
+                         .map(function (q) { return [q[0], q[1], isFinite(q[2]) ? DZ+q[2] : clear]; }) };
+    });
+
+    var pos = [0, 0, clear];
+    function move(type, b, note, id) {
+      var L = len(sub(b, pos));
+      if (L > 1e-6) moves.push({ t: type, a: pos, b: b, len: L, note: note, id: id });
+      pos = b;
+    }
+
+    ops.forEach(function (op) {
+      if (op.kind === "bore") {
+        var ax = op.ax, d = op.h.d || 5, id = op.h.op;
+        if (op.h.face === 1 || op.h.face === 6) {
+          var over = op.h.face === 1 ? [ax.p[0], ax.p[1], clear] : [ax.p[0], ax.p[1], -20];
+          move("rapid", over, "⌀" + d, id);
+          move("plunge", add(ax.p, mul(ax.dir, ax.depth)), "⌀" + d + " gylis " + op.h.z, id);
+          move("rapid", over, "", id);
+        } else {
+          var outp = add(ax.p, mul(ax.dir, -40));
+          move("rapid", [pos[0], pos[1], clear], "", id);
+          move("rapid", [outp[0], outp[1], clear], "", id);
+          move("rapid", outp, "briauna F" + op.h.face, id);
+          move("plunge", add(ax.p, mul(ax.dir, ax.depth)), "⌀" + d + " gylis " + op.h.z, id);
+          move("rapid", outp, "", id);
+          move("rapid", [outp[0], outp[1], clear], "", id);
+        }
+      } else {
+        var prev = null, id2 = op.p.op;
+        op.p.pts.forEach(function (q, k) {
+          if (!isFinite(q[0]) || !isFinite(q[1])) return;
+          var pt = [q[0], q[1], isFinite(q[2]) ? DZ + q[2] : clear];
+          if (k === 0 || q[3] === 1) {
+            move("rapid", [pos[0], pos[1], Math.max(pos[2], clear)], "", id2);
+            move("rapid", [pt[0], pt[1], Math.max(pt[2], clear)], "", id2);
+            move("rapid", pt, "frezavimo pradžia", id2);
+          } else if (isFinite(q[4]) && isFinite(q[5]) && prev) {
+            arcPts(prev, pt, q[4], q[5], q[6]).forEach(function (a2) { move("feed", a2, "lankas", id2); });
+          } else {
+            move("feed", pt, "", id2);
+          }
+          prev = pt;
+        });
+      }
+    });
+
+    var tot = 0, rap = 0, fee = 0, run = 0;
+    moves.forEach(function (m) { tot += m.len; if (m.t === "rapid") rap += m.len; else fee += m.len; });
+    moves.forEach(function (m) { m.s0 = run; run += m.len; m.s1 = run; });
+    return { DX:DX, DY:DY, DZ:DZ, clear:clear, holes:holes, paths:pathLines,
+             moves:moves, total:tot, rapid:rap, feed:fee };
+  }
+
+  /* ---------------- geometry ---------------- */
+  function boxQuads(DX, DY, DZ) {
+    var v = [[0,0,0],[DX,0,0],[DX,DY,0],[0,DY,0],[0,0,DZ],[DX,0,DZ],[DX,DY,DZ],[0,DY,DZ]];
+    return [
+      { q:[v[4],v[5],v[6],v[7]], c:PAL.faceTop }, { q:[v[0],v[3],v[2],v[1]], c:PAL.faceBot },
+      { q:[v[0],v[1],v[5],v[4]], c:PAL.faceSide }, { q:[v[3],v[7],v[6],v[2]], c:PAL.faceSide },
+      { q:[v[0],v[4],v[7],v[3]], c:PAL.faceSide2 }, { q:[v[1],v[2],v[6],v[5]], c:PAL.faceSide2 }
+    ];
+  }
+  function cylQuads(p0, p1, dia, col) {
+    var ax = norm(sub(p1, p0)), r = dia/2;
+    var up = Math.abs(ax[2]) > 0.9 ? [1,0,0] : [0,0,1];
+    var e1 = norm(cross(ax, up)), e2 = cross(ax, e1), out = [], ring = [];
+    for (var i = 0; i < SEG; i++) {
+      var t = i/SEG*2*Math.PI;
+      ring.push(add(mul(e1, Math.cos(t)*r), mul(e2, Math.sin(t)*r)));
+    }
+    for (var k = 0; k < SEG; k++) {
+      var a = ring[k], b = ring[(k+1)%SEG];
+      out.push({ q:[add(p0,a), add(p0,b), add(p1,b), add(p1,a)], c:col });
+    }
+    out.push({ q:ring.map(function (x) { return add(p1, x); }), c:col });
+    return out;
+  }
+
+  /* ---------------- viewer ---------------- */
+  function Viewer(cv, opt) {
+    this.cv = cv;
+    this.opt = Object.assign({ xray:true, holes:true, feed:true, rapid:true,
+                               table:true, tool:true, interactive:true }, opt || {});
+    this.cam = { az:-2.3, el:0.62, dist:1200, target:[0,0,0] };
+    this.scene = null; this.anim = { s:0, playing:false, speed:18, raf:0, last:0 };
+    this.onPick = null; this.onFrame = null;
+    if (this.opt.interactive) this.bind();
+  }
+
+  Viewer.prototype.setScene = function (scene, keepCam) {
+    this.scene = scene; this.anim.s = 0;
+    if (!keepCam) this.frame("iso");
+    return this;
+  };
+  Viewer.prototype.frame = function (preset) {
+    var S = this.scene; if (!S) return this;
+    this.cam.target = [S.DX/2, S.DY/2, S.DZ/2];
+    // fit the part's bounding sphere to BOTH canvas axes, so a long panel
+    // fills the frame instead of floating in the middle of it
+    var R = 0.5 * Math.sqrt(S.DX*S.DX + S.DY*S.DY + S.DZ*S.DZ);
+    var W = this.cv.clientWidth || 800, H = this.cv.clientHeight || 400;
+    var fov = 0.62, tv = Math.tan(fov/2);
+    var th = Math.tan(Math.atan(tv * (W/H)));
+    this.cam.dist = Math.max(R/tv, R/th) * 1.08;
+    if (preset === "top") { this.cam.az = -Math.PI/2; this.cam.el = 1.5; }
+    else if (preset === "front") { this.cam.az = -Math.PI/2; this.cam.el = 0.03; }
+    else if (preset === "right") { this.cam.az = 0; this.cam.el = 0.03; }
+    else if (preset) { this.cam.az = -2.3; this.cam.el = 0.62; }
+    return this;
+  };
+  Viewer.prototype.view = function (W, H) {
+    var c = this.cam, el = Math.max(-1.53, Math.min(1.53, c.el));
+    var ce = Math.cos(el), se = Math.sin(el), ca = Math.cos(c.az), sa = Math.sin(c.az);
+    var eye = add(c.target, [c.dist*ce*ca, c.dist*ce*sa, c.dist*se]);
+    var f = norm(sub(c.target, eye)), r = norm(cross(f, [0,0,1]));
+    return { eye:eye, f:f, r:r, u:cross(r,f), focal:(H/2)/Math.tan(0.62/2), W:W, H:H };
+  };
+  function proj(v, p) {
+    var d = sub(p, v.eye), z = dot(d, v.f);
+    return [v.W/2 + dot(d,v.r)*v.focal/z, v.H/2 - dot(d,v.u)*v.focal/z, z];
+  }
+  function clipSeg(v, a, b) {
+    var za = dot(sub(a, v.eye), v.f), zb = dot(sub(b, v.eye), v.f);
+    if (za < NEAR && zb < NEAR) return null;
+    if (za < NEAR) a = lerp(a, b, (NEAR - za) / (zb - za));
+    else if (zb < NEAR) b = lerp(b, a, (NEAR - zb) / (za - zb));
+    return [proj(v,a), proj(v,b)];
+  }
+
+  Viewer.prototype.posAt = function (s) {
+    var S = this.scene; if (!S || !S.moves.length) return null;
+    for (var i = 0; i < S.moves.length; i++) {
+      var m = S.moves[i];
+      if (s <= m.s1 || i === S.moves.length - 1) {
+        var t = m.len ? Math.max(0, Math.min(1, (s - m.s0)/m.len)) : 1;
+        var d = sub(m.b, m.a), dir = len(d) > 1e-6 ? norm(d) : [0,0,-1];
+        return { p: lerp(m.a, m.b, t), idx: i,
+                 dir: (m.t === "plunge" && Math.abs(dir[2]) < 0.3) ? dir : [0,0,-1] };
+      }
+    }
+    return null;
+  };
+
+  Viewer.prototype.render = function () {
+    var S = this.scene, cv = this.cv, o = this.opt;
+    if (!S || !cv) return;
+    var g = cv.getContext("2d"), dpr = Math.min(2, window.devicePixelRatio || 1);
+    var W = cv.clientWidth || 600, H = cv.clientHeight || 380;
+    if (cv.width !== Math.round(W*dpr) || cv.height !== Math.round(H*dpr)) {
+      cv.width = Math.round(W*dpr); cv.height = Math.round(H*dpr);
+    }
+    g.setTransform(dpr,0,0,dpr,0,0);
+    g.fillStyle = PAL.bg; g.fillRect(0,0,W,H);
+    var v = this.view(W, H), polys = [];
+
+    if (o.table) {
+      var step = 200, gx = Math.ceil(S.DX/step)*step + 200, gy = Math.ceil(S.DY/step)*step + 200;
+      g.strokeStyle = PAL.grid; g.lineWidth = 1;
+      for (var x = -200; x <= gx; x += step) {
+        var c1 = clipSeg(v, [x,-200,0], [x,gy,0]);
+        if (c1) { g.beginPath(); g.moveTo(c1[0][0],c1[0][1]); g.lineTo(c1[1][0],c1[1][1]); g.stroke(); }
+      }
+      for (var y = -200; y <= gy; y += step) {
+        var c2 = clipSeg(v, [-200,y,0], [gx,y,0]);
+        if (c2) { g.beginPath(); g.moveTo(c2[0][0],c2[0][1]); g.lineTo(c2[1][0],c2[1][1]); g.stroke(); }
+      }
+    }
+
+    boxQuads(S.DX, S.DY, S.DZ).forEach(function (f) { f.a = o.xray ? 0.22 : 0.97; polys.push(f); });
+    if (o.holes) S.holes.forEach(function (h) {
+      var col = h.off ? PAL.off : h.sel ? PAL.sel : (h.face === 1 || h.face === 6 ? PAL.holeTop : PAL.holeSide);
+      cylQuads(h.p0, h.p1, h.d, col).forEach(function (q) { q.a = h.off ? 0.3 : 0.92; polys.push(q); });
+    });
+
+    var tp = o.tool ? this.posAt(this.anim.s) : null;
+    if (tp) cylQuads(add(tp.p, mul(tp.dir, -Math.max(70, S.DZ*3))), tp.p, 8, PAL.tool)
+      .forEach(function (q) { q.a = 0.95; polys.push(q); });
+
+    var drawn = [];
+    polys.forEach(function (f) {
+      var ok = true, zs = 0, pts = [];
+      for (var i = 0; i < f.q.length; i++) {
+        var pr = proj(v, f.q[i]);
+        if (pr[2] < NEAR) { ok = false; break; }
+        zs += pr[2]; pts.push(pr);
+      }
+      if (ok) drawn.push({ pts:pts, z:zs/f.q.length, c:f.c, a:f.a });
+    });
+    drawn.sort(function (a,b) { return b.z - a.z; });
+    drawn.forEach(function (f) {
+      g.globalAlpha = f.a; g.fillStyle = f.c;
+      g.beginPath(); g.moveTo(f.pts[0][0], f.pts[0][1]);
+      for (var i = 1; i < f.pts.length; i++) g.lineTo(f.pts[i][0], f.pts[i][1]);
+      g.closePath(); g.fill();
+    });
+    g.globalAlpha = 1;
+
+    var E = [[0,1],[1,2],[2,3],[3,0],[4,5],[5,6],[6,7],[7,4],[0,4],[1,5],[2,6],[3,7]];
+    var vv = [[0,0,0],[S.DX,0,0],[S.DX,S.DY,0],[0,S.DY,0],
+              [0,0,S.DZ],[S.DX,0,S.DZ],[S.DX,S.DY,S.DZ],[0,S.DY,S.DZ]];
+    g.strokeStyle = PAL.wire; g.lineWidth = 1.2;
+    E.forEach(function (ed) {
+      var c = clipSeg(v, vv[ed[0]], vv[ed[1]]);
+      if (c) { g.beginPath(); g.moveTo(c[0][0],c[0][1]); g.lineTo(c[1][0],c[1][1]); g.stroke(); }
+    });
+
+    // skipped routing, drawn as a ghost so you can see what is being left out
+    S.paths.forEach(function (p) {
+      if (!p.off || !o.feed) return;
+      g.strokeStyle = PAL.off; g.lineWidth = 1.4; g.setLineDash([3,3]); g.globalAlpha = .55;
+      for (var i = 1; i < p.pts.length; i++) {
+        var c = clipSeg(v, p.pts[i-1], p.pts[i]);
+        if (c) { g.beginPath(); g.moveTo(c[0][0],c[0][1]); g.lineTo(c[1][0],c[1][1]); g.stroke(); }
+      }
+      g.setLineDash([]); g.globalAlpha = 1;
+    });
+
+    var done = this.anim.s;
+    S.moves.forEach(function (m) {
+      if (m.t === "rapid" ? !o.rapid : !o.feed) return;
+      var c = clipSeg(v, m.a, m.b); if (!c) return;
+      var past = m.s1 <= done;
+      g.setLineDash(m.t === "rapid" ? [4,4] : []);
+      g.strokeStyle = m.t === "rapid" ? (past ? PAL.rapid : PAL.rapidDim)
+                                      : (past ? PAL.feed : PAL.feedDim);
+      g.lineWidth = m.t === "rapid" ? 1.2 : 2.4;
+      g.beginPath(); g.moveTo(c[0][0],c[0][1]); g.lineTo(c[1][0],c[1][1]); g.stroke();
+    });
+    g.setLineDash([]);
+
+    var A = Math.max(60, Math.min(S.DX, S.DY) * 0.18);
+    [[[A,0,0],PAL.axX,"X"],[[0,A,0],PAL.axY,"Y"],[[0,0,A],PAL.axZ,"Z"]].forEach(function (a) {
+      var c = clipSeg(v, [0,0,0], a[0]); if (!c) return;
+      g.strokeStyle = a[1]; g.lineWidth = 2;
+      g.beginPath(); g.moveTo(c[0][0],c[0][1]); g.lineTo(c[1][0],c[1][1]); g.stroke();
+      g.fillStyle = a[1]; g.font = "600 12px ui-monospace,monospace";
+      g.fillText(a[2], c[1][0]+4, c[1][1]);
+    });
+
+    // markers: X over skipped, ring around selected
+    if (o.holes) S.holes.forEach(function (h) {
+      if (!h.off && !h.sel) return;
+      var pr = proj(v, h.mid); if (pr[2] < NEAR) return;
+      if (h.sel) {
+        g.strokeStyle = PAL.sel; g.lineWidth = 2;
+        g.beginPath(); g.arc(pr[0], pr[1], 9, 0, 6.2832); g.stroke();
+      }
+      if (h.off) {
+        g.strokeStyle = PAL.off; g.lineWidth = 1.6; var r = 5;
+        g.beginPath(); g.moveTo(pr[0]-r,pr[1]-r); g.lineTo(pr[0]+r,pr[1]+r);
+        g.moveTo(pr[0]+r,pr[1]-r); g.lineTo(pr[0]-r,pr[1]+r); g.stroke();
+      }
+    });
+
+    if (tp) {
+      var pr2 = proj(v, tp.p);
+      if (pr2[2] >= NEAR) { g.fillStyle = PAL.tool; g.beginPath(); g.arc(pr2[0],pr2[1],4,0,6.2832); g.fill(); }
+    }
+    if (this.onFrame) this.onFrame();
+  };
+
+  /* nearest hole to a canvas point, for click-to-skip */
+  Viewer.prototype.pick = function (px, py) {
+    var S = this.scene, cv = this.cv; if (!S) return null;
+    var v = this.view(cv.clientWidth, cv.clientHeight), best = null, bd = 16;
+    S.holes.forEach(function (h) {
+      var pr = proj(v, h.mid); if (pr[2] < NEAR) return;
+      var d = Math.hypot(pr[0]-px, pr[1]-py);
+      if (d < bd) { bd = d; best = h.id; }
+    });
+    return best;
+  };
+
+  Viewer.prototype.bind = function () {
+    var self = this, cv = this.cv, drag = null, moved = 0;
+    cv.addEventListener("pointerdown", function (e) {
+      drag = { x:e.clientX, y:e.clientY, pan:e.shiftKey || e.button === 1 || e.button === 2 };
+      moved = 0; cv.setPointerCapture(e.pointerId); cv.classList.add("drag");
+    });
+    cv.addEventListener("pointermove", function (e) {
+      if (!drag) return;
+      var dx = e.clientX - drag.x, dy = e.clientY - drag.y;
+      drag.x = e.clientX; drag.y = e.clientY; moved += Math.abs(dx) + Math.abs(dy);
+      if (drag.pan) {
+        var v = self.view(cv.clientWidth, cv.clientHeight), k = self.cam.dist/v.focal;
+        self.cam.target = add(self.cam.target, add(mul(v.r, -dx*k), mul(v.u, dy*k)));
+      } else {
+        self.cam.az -= dx*0.008;
+        self.cam.el = Math.max(-1.53, Math.min(1.53, self.cam.el + dy*0.008));
+      }
+      self.render();
+    });
+    ["pointerup","pointercancel"].forEach(function (k) {
+      cv.addEventListener(k, function (e) {
+        if (drag && moved < 5 && self.onPick) {
+          var r = cv.getBoundingClientRect();
+          var id = self.pick(e.clientX - r.left, e.clientY - r.top);
+          if (id != null) self.onPick(id, e.ctrlKey || e.metaKey || e.shiftKey);
+        }
+        drag = null; cv.classList.remove("drag");
+      });
+    });
+    cv.addEventListener("contextmenu", function (e) { e.preventDefault(); });
+    cv.addEventListener("wheel", function (e) {
+      e.preventDefault();
+      self.cam.dist = Math.max(60, Math.min(60000, self.cam.dist * (e.deltaY > 0 ? 1.12 : 0.893)));
+      self.render();
+    }, { passive:false });
+  };
+
+  Viewer.prototype.play = function (on) {
+    var self = this, a = this.anim;
+    a.playing = on; a.last = 0;
+    if (on) {
+      if (a.s >= this.scene.total) a.s = 0;
+      var tick = function (ts) {
+        if (!a.playing) return;
+        var dt = a.last ? (ts - a.last)/1000 : 0; a.last = ts;
+        a.s += dt * a.speed * 60;
+        if (a.s >= self.scene.total) { a.s = self.scene.total; a.playing = false; if (self.onStop) self.onStop(); }
+        self.render();
+        if (a.playing) a.raf = requestAnimationFrame(tick);
+      };
+      a.raf = requestAnimationFrame(tick);
+    } else cancelAnimationFrame(a.raf);
+    return this;
+  };
+
+  /* ---------------- full-screen window ---------------- */
+  var ui = {}, big = null, cur = null, which = "after";
+
+  function docOf(file, w) { return w === "after" && file.viewDoc ? file.viewDoc : file.doc; }
+
+  function open(file, w) {
+    cur = file;
+    if (!ui.cv) wire();
+    ui.root.classList.add("on");
+    which = (w || (file.out || file.viewDoc ? "after" : "before"));
+    ui.which.style.display = file.out ? "" : "none";
+    setWhich(which);
+  }
+  function setWhich(w) {
+    which = w;
+    Array.prototype.forEach.call(ui.which.children, function (b) { b.classList.toggle("sel", b.dataset.w === w); });
+    var doc = docOf(cur, w);
+    big.setScene(build(doc, cur.skip || {}, cur.sel || {}));
+    ui.name.textContent = cur.name + (w === "after" && cur.viewDoc ? "  (po pakeitimo)" : "  (originalas)");
+    var S = big.scene;
+    ui.stat.innerHTML =
+      '<span>' + S.DX + '×' + S.DY + '×' + S.DZ + ' mm</span>' +
+      '<span>gręžinių: ' + S.holes.filter(function (h) { return !h.off; }).length +
+        (S.holes.some(function (h) { return h.off; })
+          ? ' <span style="color:#ff5c5c">(−' + S.holes.filter(function (h) { return h.off; }).length + ')</span>' : '') + '</span>' +
+      '<span>judesių: ' + S.moves.length + '</span>' +
+      '<span>greitoji: ' + Math.round(S.rapid/10)/100 + ' m</span>' +
+      '<span style="color:#3ddc84">darbinė: ' + Math.round(S.feed/10)/100 + ' m</span>';
+    fillMoves(); syncScrub(); big.render();
+  }
+
+  function fillMoves() {
+    var S = big.scene;
+    var NAMES = { rapid:"greita", feed:"darbinė", plunge:"gręžia" };
+    var COL = { rapid:"#6b7887", feed:"#147a45", plunge:"#b25e00" };
+    ui.moves.innerHTML = S.moves.map(function (m, i) {
+      return '<div class="r" data-i="' + i + '"><span>' + (i+1) + '</span>' +
+        '<span class="ty" style="color:' + COL[m.t] + '">' + NAMES[m.t] + '</span>' +
+        '<span>' + m.b.map(function (c) { return Math.round(c*10)/10; }).join(", ") +
+        (m.note ? '  ' + esc3(m.note) : '') + '</span>' +
+        '<span class="len">' + Math.round(m.len) + '</span></div>';
+    }).join("");
+    ui._row = -1;
+    Array.prototype.forEach.call(ui.moves.children, function (r) {
+      r.addEventListener("click", function () {
+        big.anim.s = S.moves[+r.dataset.i].s1; big.play(false); syncScrub(); big.render();
+      });
+    });
+  }
+  function syncScrub() {
+    var S = big.scene;
+    ui.scrub.value = S.total ? Math.round(big.anim.s/S.total*1000) : 0;
+    ui.pos.textContent = Math.round(big.anim.s) + " / " + Math.round(S.total) + " mm";
+    ui.play.textContent = big.anim.playing ? "⏸ Stabdyti" : "▶ Leisti";
+    var tp = big.posAt(big.anim.s);
+    if (tp) markRow(tp.idx);
+  }
+  function markRow(i) {
+    var rows = ui.moves.children;
+    if (ui._row === i || !rows[i]) return;
+    if (rows[ui._row]) rows[ui._row].classList.remove("cur");
+    rows[i].classList.add("cur"); ui._row = i;
+    var r = rows[i], box = ui.moves;
+    if (r.offsetTop < box.scrollTop || r.offsetTop > box.scrollTop + box.clientHeight - 20)
+      box.scrollTop = r.offsetTop - box.clientHeight/2;
+  }
+  function close() { big.play(false); ui.root.classList.remove("on"); }
+
+  function wire() {
+    ui.root = document.getElementById("v3d");
+    ui.cv = document.getElementById("v3dCv");
+    ui.name = document.getElementById("v3dName");
+    ui.stat = document.getElementById("v3dStat");
+    ui.which = document.getElementById("v3dWhich");
+    ui.moves = document.getElementById("v3dMoves");
+    ui.play = document.getElementById("v3dPlay");
+    ui.scrub = document.getElementById("v3dScrub");
+    ui.pos = document.getElementById("v3dPos");
+
+    big = new Viewer(ui.cv, {});
+    big.onFrame = null;
+    big.onStop = function () { syncScrub(); };
+    big.onPick = function (id, add) { if (window.selectOp) window.selectOp(cur, id, add); };
+
+    ["xray","holes","feed","rapid","table"].forEach(function (k) {
+      var el = document.getElementById("v3d" + k[0].toUpperCase() + k.slice(1));
+      el.addEventListener("change", function () { big.opt[k] = el.checked; big.render(); });
+    });
+    document.getElementById("v3dClose").addEventListener("click", close);
+    Array.prototype.forEach.call(ui.which.children, function (b) {
+      b.addEventListener("click", function () { setWhich(b.dataset.w); });
+    });
+    Array.prototype.forEach.call(document.getElementById("v3dPreset").children, function (b) {
+      b.addEventListener("click", function () { big.frame(b.dataset.v); big.render(); });
+    });
+    ui.play.addEventListener("click", function () { big.play(!big.anim.playing); syncScrub(); });
+    document.getElementById("v3dStop").addEventListener("click", function () {
+      big.anim.s = 0; big.play(false); syncScrub(); big.render();
+    });
+    ui.scrub.addEventListener("input", function () {
+      big.anim.s = big.scene.total * ui.scrub.value/1000;
+      big.play(false); syncScrub(); big.render();
+    });
+    document.getElementById("v3dSpeed").addEventListener("input", function (e) { big.anim.speed = +e.target.value; });
+    window.addEventListener("resize", function () { if (ui.root.classList.contains("on")) big.render(); });
+    document.addEventListener("keydown", function (e) {
+      if (!ui.root.classList.contains("on")) return;
+      if (e.key === "Escape") close();
+      if (e.key === " ") { e.preventDefault(); big.play(!big.anim.playing); syncScrub(); }
+    });
+  }
+
+  function refresh() { if (cur && ui.root && ui.root.classList.contains("on")) setWhich(which); }
+
+  return { open: open, refresh: refresh, create: function (cv, o) { return new Viewer(cv, o); },
+           build: build, _build: build };
+})();
+</script>
+</body>
+</html>
