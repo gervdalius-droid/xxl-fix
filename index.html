@@ -124,6 +124,14 @@ body.dz-on .dzdep{display:inline-block}
               min-width:112px;text-align:right}
 .playbar .lbl{font-size:12px;color:var(--tx2)}
 
+/* LED profile routing bar */
+.ledbar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:10px 12px 2px;padding:8px 12px;
+  border-radius:8px;background:#fff6e5;border:1px solid #f0d199}
+.ledbar .lt{font-weight:650;color:#8a5a00}
+.ledbar .ls{font-family:var(--mono);font-size:11.5px;color:var(--tx2);flex:1;min-width:0}
+.ledbar.off{background:#fdecec;border-color:#f0b7b7}
+.ledbar.off .lt{color:var(--bad)}
+.ledbar button.ledx{background:var(--bad);color:#fff;border:0;font-weight:650}
 /* skipping an operation removes it from the program - make that obvious */
 .ed .acts button.skipbtn{background:#fdecec;color:var(--bad);border:1px solid #f0b7b7;font-weight:650}
 .ed .acts button.skipbtn:hover{background:#fbdcdc;filter:none}
@@ -233,6 +241,11 @@ body.dz-on .dzdep{display:inline-block}
           <option value="bottom">visus matuoti nuo apačios</option>
           <option value="top">visus matuoti nuo viršaus</option>
         </select>
+      </div>
+
+      <div class="drow">
+        <label class="chk"><input type="checkbox" id="ledOff"> Visada praleisti LED frezavimą</label>
+        <span class="u">(stalčių žymės — nauji failai įkeliami jau be jo)</span>
       </div>
 
       <div class="drow">
@@ -463,6 +476,13 @@ var XXL = (function () {
     return { L: 2, R: 3, F: 4, B: 5 }[r];
   }
 
+  /* SWOOD / step2xxl put the operation name on its own comment line right
+     before the toolpath:   ; ***** LED_PROFILE_DRAG_ON_EDGE
+     The "LED" ones are the drawer-marking LED profile channels the shop
+     usually does not want cut. */
+  var LABEL = /^;\s*\*{3,}\s*([^*\s][^*]*?)\s*$/;
+  function isLed(name) { return !!name && /(^|[^A-Z])LED([^A-Z]|$)/i.test(name); }
+
   // ---- parse --------------------------------------------------------------
   function parse(text) {
     var crlf = /\r\n/.test(text);
@@ -479,12 +499,17 @@ var XXL = (function () {
     };
 
     var face = 1, cur = null, planeFace = -1, org = ORG0;
+    var label = null;            // last "; ***** NAME" comment = next operation's name
 
     for (var i = 0; i < lines.length; i++) {
       var raw = lines[i];
       var sc = splitComment(raw);
       var code = sc[0].trim();
-      if (!code) continue;
+      if (!code) {
+        var lb = LABEL.exec(sc[1]);
+        if (lb) label = lb[1].trim();
+        continue;
+      }
 
       if (/^H\s/i.test(code) && doc.headerIdx < 0) {
         var p = params(code);
@@ -520,6 +545,7 @@ var XXL = (function () {
       }
 
       if (/^XBO/i.test(code)) {
+        label = null;
         var f = pm.F !== undefined ? parseInt(pm.F, 10) : face;
         doc.faceUse[f] = (doc.faceUse[f] || 0) + 1;
         var x = num(pm, "X"), y = num(pm, "Y"), z = num(pm, "Z"), d = num(pm, "D") || 5;
@@ -537,7 +563,9 @@ var XXL = (function () {
 
       if (/^XG0/i.test(code)) {
         cur = { face: face, line: i, lastLine: i, d: num(pm, "D") || 0, tool: pm.T,
+                name: label || "", led: isLed(label),
                 pts: [[num(pm, "X"), num(pm, "Y"), num(pm, "Z"), 1]] };
+        label = null;
         doc.paths.push(cur); continue;
       }
       if (/^(XL2P|XA2P)/i.test(code)) {
@@ -833,7 +861,8 @@ var XXL = (function () {
       for (var i = 1; i < pts.length; i++)
         L += Math.hypot(pts[i][0]-pts[i-1][0], pts[i][1]-pts[i-1][1]);
       ops.push({ id: p.op, line: p.line, kind: "route", face: p.face, d: p.d, n: pts.length,
-                 len: L, x: pts.length ? pts[0][0] : 0, y: pts.length ? pts[0][1] : 0 });
+                 len: L, x: pts.length ? pts[0][0] : 0, y: pts.length ? pts[0][1] : 0,
+                 name: p.name || "", led: !!p.led });
     });
     ops.sort(function (a, b) { return a.id - b.id; });
     return ops;
@@ -943,7 +972,7 @@ var XXL = (function () {
   return {
     parse: parse, rotate: rotate, setThickness: setThickness, transform: transform,
     applySkip: applySkip, applyEdits: applyEdits, operations: operations,
-    SKIP_TAG: SKIP_TAG,
+    SKIP_TAG: SKIP_TAG, isLed: isLed,
     _: { faceToSide: faceToSide, sideToFace: sideToFace, rotSide: rotSide, rotFace: rotFace,
          setParams: setParams, params: params, fmt: fmt, splitComment: splitComment,
          newThick: newThick, newDepth: newDepth }
@@ -1145,7 +1174,7 @@ var $ = function (s) { return document.querySelector(s); };
 /* Deliberately NOT persisted: dzOn.  Changing material thickness is a decision
    about one job; restoring it from a previous session would quietly alter a
    program with nothing on screen to say so. */
-var SETTINGS = ["dz", "dzPolicy", "outAuto", "outTags", "outPrefix"];
+var SETTINGS = ["dz", "dzPolicy", "outAuto", "outTags", "outPrefix", "ledOff"];
 var SETTINGS_KEY = "xxlfix.settings.v2";
 function loadSettings() {
   var raw;
@@ -1278,6 +1307,11 @@ function autoSend() {
 }
 $("#outAll").addEventListener("click", function () { sendAll(false); });
 OUT.restore().then(outRefresh);
+$("#ledOff").addEventListener("change", function () {
+  var off = $("#ledOff").checked;
+  files.forEach(function (f) { setLed(f, !off); });
+  saveSettings(); recompute();
+});
 $("#dzOn").addEventListener("change", function () {
   document.body.classList.toggle("dz-on", $("#dzOn").checked);
 });
@@ -1294,11 +1328,13 @@ function load(fl) {
     var r = new FileReader();
     r.onload = function () {
       var doc = XXL.parse(r.result);
-      files.push({
+      var nf = {
         name: f.name, text: r.result,
         rot: doc.DY > doc.DX ? 1 : 0,          // the only reason this app gets opened
         view: "2d", skip: {}, edits: {}, sel: {}
-      });
+      };
+      if ($("#ledOff").checked) setLed(nf, false, doc);
+      files.push(nf);
       if (--pend === 0) recompute();
     };
     r.readAsText(f, "utf-8");
@@ -1352,6 +1388,36 @@ function hasEdit(f, id) {
   return !!(e && (e.dx || e.dy || e.ds || e.dt || e.dz || e.d != null));
 }
 
+/* LED profile routing (drawer markings).  on=false drops every LED toolpath of
+   the file, on=true puts them back. */
+function ledOps(f, doc) {
+  return ((doc || f.doc || XXL.parse(f.text)).paths || []).filter(function (p) { return p.led; });
+}
+function setLed(f, on, doc) {
+  if (!f.skip) f.skip = {};
+  ledOps(f, doc).forEach(function (p) { if (on) delete f.skip[p.op]; else f.skip[p.op] = 1; });
+}
+function ledHTML(f, idx) {
+  var L = ledOps(f, f.viewDoc || f.doc);
+  if (!L.length) return "";
+  var off = L.every(function (p) { return f.skip[p.op]; });
+  var mm = Math.round(L.reduce(function (s, p) {
+    var q = p.pts, n = 0;
+    for (var i = 1; i < q.length; i++) n += Math.hypot(q[i][0]-q[i-1][0], q[i][1]-q[i-1][1]);
+    return s + n;
+  }, 0));
+  return '<div class="ledbar' + (off ? ' off' : '') + '">' +
+    '<span class="lt">' + (off
+      ? '✕ LED frezavimas praleistas — į programą nepateks'
+      : '⚠ Programoje yra LED frezavimas (stalčių žymės)') + '</span>' +
+    '<span class="ls">' + L.length + ' kel. · ' + mm + ' mm · ' +
+      esc(L.map(function (p) { return p.name; }).filter(function (v, i, a) { return a.indexOf(v) === i; }).join(", ")) +
+    '</span>' +
+    '<button class="' + (off ? 'ghost' : 'ledx') + '" data-led="' + idx + '">' +
+      (off ? '↩ Grąžinti LED' : '✕ Nedaryti LED frezavimo') + '</button>' +
+  '</div>';
+}
+
 /* Anything that changes the output must be visible with the drawer shut. */
 function drawerBadge() {
   var on = [];
@@ -1359,6 +1425,7 @@ function drawerBadge() {
   if (outPrefix() !== "NEW_") on.push("priešdėlis „" + (outPrefix() || "–") + "“");
   if ($("#outTags").value === "tag") on.push("vardas su žymomis");
   if ($("#outAuto").checked) on.push("įrašo automatiškai");
+  if ($("#ledOff").checked) on.push("LED frezavimas praleidžiamas");
   $("#drawerBadge").innerHTML = on.length
     ? '<span class="on">⚠ ' + esc(on.join(" · ")) + '</span>' : "";
 }
@@ -1405,7 +1472,7 @@ function recompute() {
 
 function opLabel(op) {
   if (op.kind === "route")
-    return 'frezavimas  ' + (op.d ? '⌀' + op.d + '  ' : '') + op.n + ' tšk.  ' + Math.round(op.len) + ' mm';
+    return (op.led ? 'LED frezavimas  ' : op.name ? 'frezavimas ' + op.name + '  ' : 'frezavimas  ') + (op.d ? '⌀' + op.d + '  ' : '') + op.n + ' tšk.  ' + Math.round(op.len) + ' mm';
   var FN = {1:"viršus F1", 2:"kairė F2", 3:"dešinė F3", 4:"priekis F4", 5:"galas F5", 6:"apačia F6"};
   return 'gręžimas ⌀' + op.d + '  ' + (FN[op.face] || ("F" + op.face)) +
          '  X' + rnd(op.x) + ' Y' + rnd(op.y) + (op.edge ? ' t' + rnd(op.t) : '') + '  Z' + op.z;
@@ -1557,6 +1624,7 @@ function render() {
         '<button class="dl" data-dl="' + idx + '">Atsisiųsti</button>' +
         '<button class="x" data-rm="' + idx + '" title="Šalinti">✕</button>' +
       '</div>' +
+      ledHTML(f, idx) +
 
       '<div class="stage">' +
         '<div class="tabs">' +
@@ -1785,6 +1853,15 @@ function wireCards(list) {
     if (spd) spd.addEventListener("input", function () { vw.anim.speed = +spd.value; });
 
     requestAnimationFrame(function () { vw.render(); sync(); });
+  });
+
+  // LED on/off
+  list.querySelectorAll("[data-led]").forEach(function (b) {
+    b.addEventListener("click", function () {
+      var f = files[+b.dataset.led], L = ledOps(f, f.viewDoc || f.doc);
+      setLed(f, L.every(function (p) { return f.skip[p.op]; }), f.viewDoc || f.doc);
+      keepScroll(recompute);
+    });
   });
 
   // operations list

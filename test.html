@@ -52,7 +52,7 @@ async function run(){
   if (v3) (0,eval)(v3[1]);
 
   var fx = {};
-  for (var n of ["swood_portrait","maestro_edges","maestro_routing","maestro_arcs","swood_edges"])
+  for (var n of ["swood_portrait","maestro_edges","maestro_routing","maestro_arcs","swood_edges","step2xxl_led"])
     fx[n] = await (await fetch("fixtures/"+n+".xxl")).text();
 
   /* ---------------- parsing ---------------- */
@@ -821,6 +821,28 @@ async function run(){
     ck("Veikimo metu klaidų nebuvo", errs.length === 0, JSON.stringify(errs));
     fr.remove();
   })();
+
+  /* ---------------- LED profile routing ---------------- */
+  section("LED frezavimas (stalčių žymės)");
+  var ld = XXL.parse(fx.step2xxl_led);
+  ck("LED: 8 gręžimai + 1 frezavimas", ld.holes.length===8 && ld.paths.length===1,
+     ld.holes.length+" / "+ld.paths.length);
+  ck("LED: kelias pavadintas iš komentaro", ld.paths[0] && ld.paths[0].name==="LED_PROFILE_DRAG_ON_EDGE",
+     ld.paths[0] && ld.paths[0].name);
+  ck("LED: atpažintas kaip LED", ld.paths[0] && ld.paths[0].led===true);
+  ck("LED: operations() perduoda led", XXL.operations(ld).filter(function(o){return o.led;}).length===1);
+  ck("Kiti frezavimai NE LED", ["maestro_routing","maestro_arcs"].every(function(n){
+       return XXL.parse(fx[n]).paths.every(function(p){ return !p.led; }); }));
+  ck("isLed: tik atskiras žodis LED", XXL.isLed("LED_PROFILE_DRAG_ON_EDGE") && XXL.isLed("led profile") &&
+     !XXL.isLed("SLEDGE") && !XXL.isLed("") && !XXL.isLed(null));
+  var lr = XXL.transform(fx.step2xxl_led, { skip: [ld.paths[0].op] });
+  var lo = XXL.parse(lr.text);
+  ck("Praleidus LED: frezavimo neliko", lr.ok && lo.paths.length===0, lo.paths.length);
+  ck("Praleidus LED: visi 8 gręžimai liko", lo.holes.length===8 &&
+     fingerprint(lo).join()===fingerprint(ld).join());
+  ck("Praleidus LED: nė vienos aktyvios T=96 eilutės",
+     !lr.text.split(/\r?\n/).some(function(l){ return /^\s*X(G0|L2P|A2P)/.test(l); }));
+  ck("Praleidus LED: .END vietoje", /\n\.END\r?\n/.test(lr.text));
 
   /* ---------------- summary ---------------- */
   var s=document.getElementById("sum");
