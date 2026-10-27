@@ -54,6 +54,29 @@ jokio Python. Atidaryti dvigubu spustelėjimu naršyklėje.
 python3 serve.py            # tik jei norisi per http://localhost:8748/
 ```
 
+## Nauja detalė (programa be SolidWorks)
+
+Mygtukas **`＋ Nauja detalė`** viršuje dešinėje atidaro detalės kūrimo langą — dirbtuvėse
+galima pasidaryti programą be inžinieriaus ir be SolidWorks.
+
+1. **Plokštė** — ilgis X, plotis Y, storis (16 / 18 / 19 / 22 / 25 arba savas).
+2. **Pridėti operaciją** — skylė (Ø5 / 8 / 15 / 35, aklina arba kiaurai), lentynų skylių eilės,
+   vyrių lizdai Ø35, briaunos skylė, griovelis, kampo išpjova, išpjova viduje, apvali kiaurymė.
+3. **Nustatymai** dešinėje — kiekviena vieta įvedama **nuo tos briaunos, nuo kurios matavote**
+   (nuo kairės / centre / nuo dešinės, nuo priekio / centre / nuo galo). Pakeitus plokštės dydį,
+   skylė lieka toje pačioje vietoje nuo tos briaunos. Kartojimas (kiekis + žingsnis) ir
+   veidrodinės kopijos. Operaciją galima vilkti brėžinyje; rodyklės ±1 mm (Shift ±10).
+4. **Programos** apačioje — kiek jų reikia ir ką daryti su plokšte:
+   `1OP` plokštė kaip brėžinyje; `2OP` apversta (apatinės pusės skylės ir grioveliai);
+   pasukta 90° programa (Ø5 ilgosiose briaunose). `3D`, `Kodas`, `Atsisiųsti`, `Įrašyti į stakles`.
+
+Programos rašomos lygiai taip pat, kaip jas rašo **step2xxl** (tos pačios eilutės, tie patys
+veidų numeriai, `_1OP` / `_2OP` / `_3OP` vardai), su tomis pačiomis taisyklėmis:
+frezuojant paliekama 2 mm, freza niekada nesminga vertikaliai (įeina nuožulniai ≤ 30 mm),
+niekada daugiau kaip 20 mm už plokštės (Maestro NC17050). Klaidos rodomos iškart —
+kol jų yra, atsisiųsti negalima. Detalės išsaugomos šiame kompiuteryje (**`Mano detalės`**),
+o neužbaigta detalė lieka atidarius langą iš naujo.
+
 ## Ką daro transformacija
 
 Vienas žingsnis (90° prieš laikrodį): `(x, y) → (DY − y, x)`, `DX' = DY`, `DY' = DX`.

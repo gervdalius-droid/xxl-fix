@@ -50,13 +50,27 @@ arc directions, and stamps the file so you can tell a fixed program from an orig
 Also handles thickness override and edge/routing operations, with fixtures covering SWOOD and
 Maestro output.
 
+## Make a part by hand
+
+**`＋ Nauja detalė`** (top right) opens a part builder, so the workshop can make a program
+without the engineer or SolidWorks: set the panel size, add holes (Ø5/8/15/35, blind or
+through), shelf-pin rows, hinge cups, edge holes, grooves, corner notches, cut-outs and round
+holes, position each one **from the edge it was measured from**, drag it on the drawing, and
+download or send the programs straight to the machine.
+
+It writes exactly what step2xxl writes (same lines, same face numbering, `_1OP`/`_2OP`/`_3OP`)
+and follows the same machine rules: underside work goes to a turned-over 2OP, Ø5 in a long edge
+to a 90°-rotated program, routing always leaves 2 mm, ramps in instead of plunging and never
+goes more than 20 mm outside the panel. Invalid parts can't be downloaded; every check says
+why in plain Lithuanian.
+
 ## Run it
 
 ```bash
 python3 serve.py          # http://localhost:8748/
 ```
 
-Tests: <http://localhost:8748/test.html> — **66 checks** against real `.XXL` fixtures in
+Tests: <http://localhost:8748/test.html> — **375 checks** against real `.XXL` fixtures in
 [`fixtures/`](fixtures) (SWOOD portrait/edges, Maestro arcs/edges/routing).
 
 There's a `windows/` folder with a double-click launcher for the shop PC, because the person

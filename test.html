@@ -844,6 +844,191 @@ async function run(){
      !lr.text.split(/\r?\n/).some(function(l){ return /^\s*X(G0|L2P|A2P)/.test(l); }));
   ck("Praleidus LED: .END vietoje", /\n\.END\r?\n/.test(lr.text));
 
+  /* ---------------- part builder (Nauja detalė) ----------------
+     The generator must write exactly what step2xxl writes - that output is
+     what has been running on the machine. */
+  section("Nauja detalė — programų generavimas");
+  var pc = /<script id="part-core">([\s\S]*?)<\/script>/.exec(html);
+  ck("part-core įkeltas", !!pc);
+  if (pc) (0,eval)(pc[1]);
+  function mk(P, kind, o) { var x = PART.make(kind, P); Object.assign(x, o || {}); P.ops.push(x); return x; }
+  function lines(t, re) { return t.split(/\r?\n/).filter(function (l) { return re.test(l); }); }
+  function moves(t) {
+    return lines(t, /^ X(G0|L2P|A2P) /).map(function (l) {
+      var g = function (k) { var m = new RegExp(" " + k + "=(-?[\\d.]+)").exec(l); return m ? +m[1] : NaN; };
+      return { t: /^ XG0/.test(l) ? "G0" : /^ XA2P/.test(l) ? "A" : "L", x: g("X"), y: g("Y"), z: g("Z"), l: l };
+    });
+  }
+
+  // 1. the step2xxl reference program, rebuilt by hand
+  var ref = { name: "_10", DX: 744, DY: 560, DZ: 18, ops: [] };
+  mk(ref, "edge", { edge: "L", d: 5, depth: 32, s: 50, sr: "F", n: 3, step: 212.5 });
+  mk(ref, "hole", { d: 8, through: true, x: 30, xr: "L", y: 516, yr: "F", n: 2, step: 66, dir: "X" });
+  mk(ref, "hole", { d: 8, through: true, x: 135, xr: "L", y: 50, yr: "F", n: 3, step: 212.5, dir: "Y" });
+  var rb = PART.build(ref);
+  ck("step2xxl pavyzdys: be klaidų, 1 programa", rb.ok && rb.programs.length === 1, JSON.stringify(rb.check));
+  var want = lines(fx.step2xxl_led, /^ XBO /), got = rb.ok ? lines(rb.programs[0].text, /^ XBO /) : [];
+  ck("Gręžimų eilutės identiškos step2xxl (8/8)", want.join("\n") === got.join("\n"), got.join("\n"));
+  ck("Antraštė kaip step2xxl", rb.ok && rb.programs[0].text.split("\r\n")[0] === fx.step2xxl_led.split(/\r?\n/)[0],
+     rb.ok && rb.programs[0].text.split("\r\n")[0]);
+  ck("Failo vardas <PAVADINIMAS>_1OP.XXL", rb.ok && rb.programs[0].file === "_10_1OP.XXL", rb.ok && rb.programs[0].file);
+  ck("CRLF ir tik ASCII", rb.ok && /\r\n/.test(rb.programs[0].text) && /^[\x00-\x7f]*$/.test(rb.programs[0].text));
+  ck("Pabaiga .END / ;FINEPROG", rb.ok && /\r\n\.END\r\n;\*+\r\n;FINEPROG\r\n$/.test(rb.programs[0].text));
+  var rp = rb.ok ? XXL.parse(rb.programs[0].text) : { errors: ["-"], holes: [] };
+  ck("XXL Fix perskaito: 8 gręžimai, be klaidų", rp.errors.length === 0 && rp.holes.length === 8, rp.errors.join("; ") + " / " + rp.holes.length);
+
+  // 2. faces and the extra programs
+  var sp = { name: "Šonas spintai", DX: 720, DY: 560, DZ: 18, ops: [] };
+  mk(sp, "edge", { edge: "R", d: 8, depth: 27, s: 100, sr: "B" });                       // X=DX end -> F=2
+  mk(sp, "edge", { edge: "B", d: 8, depth: 27, s: 100, sr: "R" });                       // long edge Ø8 in place -> F=5
+  mk(sp, "edge", { edge: "F", d: 5, depth: 32, s: 50, sr: "L", n: 2, step: 300 });       // long edge Ø5 -> rotated
+  mk(sp, "hole", { face: "B", d: 35, depth: 13, x: 100, xr: "L", y: 22.5, yr: "F", mx: true }); // underside -> 2OP
+  mk(sp, "hole", { d: 5, depth: 2, x: 360, xr: "L", y: 280, yr: "F" });                  // mark
+  var sb = PART.build(sp), pk = sb.programs.map(function (p) { return p.kind; }).join(",");
+  ck("Programos: 1OP + 2OP (apversta) + 3OP (pasukta)", sb.ok && pk === "main,flip,rot", pk + " " + JSON.stringify(sb.check));
+  var t1 = sb.ok ? sb.programs[0].text : "", t2 = sb.ok ? sb.programs[1].text : "", t3 = sb.ok ? sb.programs[2].text : "";
+  ck("Vardai be lietuviškų raidžių", sb.ok && sb.programs[0].file === "Sonas_spintai_1OP.XXL", sb.ok && sb.programs[0].file);
+  ck("Dešinys galas (X=DX) -> F=2, X=aukštis", t1.indexOf(' XBO X=9 Y=460 Z=-27 D=8 N="P" F=2 R=1#') >= 0, lines(t1, /XBO/).join("\n"));
+  ck("Ilgoji briauna Ø8 vietoje -> F=5, X išilgai, Y=aukštis", t1.indexOf(' XBO X=620 Y=9 Z=-27 D=8 N="P" F=5 R=1#') >= 0);
+  ck("Žymė ≤ 2 mm -> N=\"L\"", t1.indexOf(' XBO X=360 Y=280 Z=-2 D=5 N="L" F=1 R=1#') >= 0);
+  ck("Apačios skylės -> 2OP, Y atspindėtas (560-22.5)", lines(t2, /XBO/).join("|") ===
+     ' XBO X=100 Y=537.5 Z=-13 D=35 N="P" F=1 R=1#| XBO X=620 Y=537.5 Z=-13 D=35 N="P" F=1 R=1#', lines(t2, /XBO/).join("\n"));
+  ck("2OP komentaras operatoriui", /; 2OP: panel turned over about the X axis/.test(t2));
+  ck("Pasukta programa: DX=560 DY=720", /^H DX=560 DY=720 DZ=18 /.test(t3), t3.split("\r\n")[0]);
+  ck("Priekis -> kairysis galas F=3, Y = 720 - x", lines(t3, /XBO/).join("|") ===
+     ' XBO X=9 Y=370 Z=-32 D=5 N="P" F=3 R=1#| XBO X=9 Y=670 Z=-32 D=5 N="P" F=3 R=1#', lines(t3, /XBO/).join("\n"));
+  ck("3OP komentaras: pasukti prieš laikrodžio rodyklę", /COUNTER-CLOCKWISE/.test(t3));
+  ck("3D vaizdui: pasuktos skylės kairiajame gale", sb.ok && sb.programs[2].view.holes.every(function (h) { return h.face === 2 && h.x === 0; }));
+
+  var lg = { name: "ILGA", DX: 1200, DY: 400, DZ: 18, ops: [] };
+  mk(lg, "edge", { edge: "F", d: 5, depth: 32, s: 100, sr: "L" });
+  var lgb = PART.check(lg);
+  ck("Ø5 ilgojoje briaunoje, plokštė > 900 -> klaida", lgb.errors === 1, JSON.stringify(lgb.ops));
+
+  // 3. routing rules (2 mm skin, ramp, never plunge, 20 mm air limit)
+  var rt = { name: "R", DX: 720, DY: 560, DZ: 18, ops: [] };
+  mk(rt, "groove", { dir: "X", p: 20, pr: "B", w: 16, depth: 8, full: true });
+  mk(rt, "groove", { dir: "Y", p: 100, pr: "L", w: 40, depth: 10, full: false, a: 50, ar: "F", len: 200 });
+  ["FL", "FR", "BL", "BR"].forEach(function (c) { mk(rt, "notch", { corner: c, a: 40, b: 30 }); });
+  mk(rt, "cut", { xr: "L", x: 300, yr: "F", y: 200, w: 120, h: 80 });
+  mk(rt, "circle", { xr: "L", x: 200, yr: "B", y: 120, D: 60 });
+  mk(rt, "groove", { face: "B", dir: "Y", p: 30, pr: "R", w: 16, depth: 6, full: true });
+  var rtb = PART.build(rt);
+  ck("Frezavimai: be klaidų", rtb.ok, JSON.stringify(rtb.check));
+  var mv = [], air = [], deep = [], plunge = [], ramps = 0;
+  rtb.programs.forEach(function (pg) {
+    var m = moves(pg.text), prev = null;
+    m.forEach(function (q) {
+      if (q.x < -20 - 1e-9 || q.x > pg.DX + 20 + 1e-9 || q.y < -20 - 1e-9 || q.y > pg.DY + 20 + 1e-9) air.push(q.l);
+      if (q.z < -(18 - 2) - 1e-9) deep.push(q.l);
+      if (prev && q.t === "L" && q.x === prev.x && q.y === prev.y && q.z < prev.z - 1e-9 && q.z < 0) plunge.push(q.l);
+      if (prev && q.t === "L" && prev.z === 0 && q.z < 0 && (q.x !== prev.x || q.y !== prev.y)) ramps++;
+      prev = q;
+    });
+    mv = mv.concat(m);
+  });
+  var nRoutes = rtb.programs.reduce(function (a, p) { return a + p.routes.length; }, 0);
+  ck("Niekada > 20 mm už plokštės (NC17050)", air.length === 0, air.join("\n"));
+  ck("Visada lieka 2 mm (Z ≥ -16)", deep.length === 0, deep.join("\n"));
+  ck("Niekada nesminga vertikaliai į medžiagą", plunge.length === 0, plunge.join("\n"));
+  ck("Kiekvienas frezavimas įeina nuožulniai", ramps === nRoutes, ramps + " / " + nRoutes);
+  ck("Kiaurymė: 4 lankai G=3 aplink centrą", lines(rtb.programs[0].text, / XA2P .* I=200 J=440 G=3 /).length === 4);
+  ck("Apačios griovelis -> 2OP", rtb.programs.length === 2 && rtb.programs[1].routes.length === 1);
+  ck("Kampų išpjovos: medžiaga dešinėje (frezuoja atliekų pusėje)", (function () {
+    // every notch path stays inside its notch rectangle grown by the lead-in, i.e. in the waste
+    return rt.ops.filter(function (o) { return o.kind === "notch"; }).every(function (o, k) {
+      var r = PART.notchRect(o, rt), rtx = rtb.programs[0].routes.filter(function (q) { return q.name === "NOTCH"; })[k];
+      return rtx.moves.every(function (q) {
+        return q.x >= r.x0 - PART.LEAD - 1e-6 && q.x <= r.x1 - PART.R + 1e-6 + (r.x0 > 0 ? PART.LEAD + PART.R : 0) &&
+               q.y >= r.y0 - PART.LEAD - 1e-6 && q.y <= r.y1 + PART.LEAD + 1e-6;
+      });
+    });
+  })());
+  var rp2 = XXL.parse(rtb.programs[0].text);
+  ck("XXL Fix perskaito frezavimus", rp2.errors.length === 0 && rp2.paths.length === rtb.programs[0].routes.length, rp2.paths.length);
+  ck("Nė vienas frezavimas nepažymėtas kaip LED", rp2.paths.every(function (p) { return !p.led; }));
+
+  // 4. checks a worker will hit
+  function errs(P) { return PART.check(P).errors; }
+  var e1 = { name: "E", DX: 600, DY: 400, DZ: 18, ops: [] };
+  mk(e1, "hole", { d: 6 });                                         ck("Ø6 grąžto nėra -> klaida", errs(e1) === 1);
+  e1.ops = []; mk(e1, "hole", { d: 15, through: true });             ck("Ø15 kiaurai -> klaida", errs(e1) === 1);
+  e1.ops = []; mk(e1, "hole", { d: 8, depth: 18 });                  ck("Gylis = storis be „Kiaurai“ -> klaida", errs(e1) === 1);
+  e1.ops = []; mk(e1, "hole", { x: 650 });                           ck("Skylė už ribų -> klaida", errs(e1) === 1);
+  e1.ops = []; mk(e1, "edge", { edge: "L", d: 8, depth: 40 });       ck("Briaunos gylis > 35 -> klaida", errs(e1) === 1);
+  e1.ops = []; mk(e1, "groove", { w: 10 });                          ck("Griovelis siauresnis už frezą -> klaida", errs(e1) === 1);
+  e1.ops = []; mk(e1, "groove", { depth: 17 });                      ck("Griovelis giliau nei storis-2 -> klaida", errs(e1) === 1);
+  e1.ops = []; mk(e1, "circle", { D: 12 });                          ck("Kiaurymė < Ø20 -> klaida", errs(e1) === 1);
+  e1.ops = []; mk(e1, "cut", { xr: "L", x: 0 });                     ck("Išpjova liečia kraštą -> klaida", errs(e1) === 1);
+  var e2 = { name: "E", DX: 400, DY: 1000, DZ: 18, ops: [] };
+  ck("Per plati (Y > 900) -> klaida", errs(e2) === 1);
+  var e3 = { name: "", DX: 600, DY: 400, DZ: 18, ops: [] };
+  ck("Be pavadinimo -> klaida", errs(e3) === 1);
+  e1.ops = []; mk(e1, "shelf"); mk(e1, "hinge"); mk(e1, "edge"); mk(e1, "groove"); mk(e1, "notch"); mk(e1, "cut"); mk(e1, "circle"); mk(e1, "hole");
+  ck("Visos naujos operacijos iškart teisingos", errs(e1) === 0, JSON.stringify(PART.check(e1).ops));
+
+  // 5. measured from an edge -> stays put when the panel grows
+  var g1 = { name: "G", DX: 600, DY: 400, DZ: 18, ops: [] };
+  mk(g1, "hole", { x: 37, xr: "R", y: 50, yr: "B" });
+  g1.DX = 800; g1.DY = 500;
+  var hp = PART.holePts(g1.ops[0], g1)[0];
+  ck("Skylė lieka 37 nuo dešinės / 50 nuo galo pakeitus dydį", hp.x === 763 && hp.y === 450, hp.x + "," + hp.y);
+  var c2 = { name: "C", DX: 600, DY: 400, DZ: 18, ops: [] };
+  mk(c2, "hole", { x: 0, xr: "C", n: 3, step: 32, dir: "X" });
+  ck("Centruota eilė lieka centre", PART.holePts(c2.ops[0], c2).map(function (p) { return p.x; }).join() === "268,300,332");
+
+  // 6. turning the whole part 90° four times changes nothing
+  var q = rt; for (var qi = 0; qi < 4; qi++) q = PART.rotate(q);
+  ck("Pasukus 4×90° — tos pačios programos", JSON.stringify(PART.build(q).programs.map(function (p) { return p.text; })) ===
+     JSON.stringify(rtb.programs.map(function (p) { return p.text; })));
+  var r1x = PART.rotate(sp), r1b = PART.build(r1x);
+  ck("Pasukus 90°: tos pačios skylės (tik kitoje padėtyje)", r1b.ok &&
+     r1b.programs.reduce(function (a, p) { return a + p.bores.length; }, 0) === sb.programs.reduce(function (a, p) { return a + p.bores.length; }, 0),
+     JSON.stringify(r1b.check));
+
+  /* ---------------- part builder UI ---------------- */
+  section("Nauja detalė — langas");
+  await (async function () {
+    var fr = document.createElement("iframe");
+    fr.style.cssText = "width:1280px;height:1024px;border:1px solid #2b313d;border-radius:8px;margin:8px 0";
+    fr.src = "index.html";
+    document.getElementById("out").appendChild(fr);
+    await new Promise(function (res) { fr.onload = res; });
+    var w = fr.contentWindow, doc = fr.contentDocument, errs2 = [];
+    w.addEventListener("error", function (e) { errs2.push(e.message); });
+    try { w.localStorage.removeItem("xxlfix.builder.draft.v1"); } catch (e) {}
+    await new Promise(function (r) { setTimeout(r, 300); });
+    var ob = doc.getElementById("pbOpen");
+    ck("Mygtukas „Nauja detalė“ antraštėje", !!ob);
+    ob.click();
+    await new Promise(function (r) { setTimeout(r, 200); });
+    ck("Langas atsidaro", !doc.getElementById("pb").hidden);
+    ck("8 operacijų mygtukai", doc.querySelectorAll("#pbTiles [data-add]").length === 8);
+    w.PB.set({ v: 1, name: "TEST", DX: 720, DY: 560, DZ: 18, ops: [] });
+    Array.prototype.forEach.call(doc.querySelectorAll("#pbTiles [data-add]"), function (b) { b.click(); });
+    await new Promise(function (r) { setTimeout(r, 200); });
+    ck("Visos 8 operacijos pridėtos", w.PB.get().ops.length === 8, w.PB.get().ops.length);
+    ck("Brėžinyje matosi operacijos", doc.querySelectorAll("#pbSvg g.op").length >= 8, doc.querySelectorAll("#pbSvg g.op").length);
+    var b = w.PB.built();
+    ck("Paruošta be klaidų", b && b.ok && b.programs.length >= 1, b && JSON.stringify(b.check));
+    ck("Programų kortelė apačioje", doc.querySelectorAll("#pbProgs .pb-prog").length === (b ? b.programs.length : -1));
+    ck("Pasirinkta paskutinė operacija rodo nustatymus", !!doc.querySelector("#pbRight .pb-ph"));
+    // type a bad value: status turns red, button disabled
+    var o = w.PB.get().ops[0]; w.PB.select(o.id);
+    var inp = doc.querySelector('#pbRight .pb-num[data-k="depth"] input');
+    inp.value = "25"; inp.dispatchEvent(new Event("input", { bubbles: true }));
+    ck("Klaidingas gylis -> „pataisykite“ ir atsisiuntimas išjungtas",
+       /pataisykite/.test(doc.getElementById("pbStatus").textContent) && doc.getElementById("pbDl").disabled);
+    inp.value = "12,5"; inp.dispatchEvent(new Event("input", { bubbles: true }));
+    ck("Kablelis priimamas (12,5)", w.PB.get().ops[0].depth === 12.5, w.PB.get().ops[0].depth);
+    ck("Telpa į 1280×1024 be slinkimo", doc.getElementById("pb").scrollHeight <= 1024 && doc.getElementById("pb").scrollWidth <= 1280,
+       doc.getElementById("pb").scrollWidth + "×" + doc.getElementById("pb").scrollHeight);
+    doc.getElementById("pbClose").click();
+    ck("Uždaromas", doc.getElementById("pb").hidden);
+    ck("Klaidų nebuvo", errs2.length === 0, JSON.stringify(errs2));
+    fr.remove();
+  })();
+
   /* ---------------- summary ---------------- */
   var s=document.getElementById("sum");
   s.className = F? "fail":"pass";

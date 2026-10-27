@@ -211,6 +211,173 @@ body.dz-on .dzdep{display:inline-block}
 #v3d .mv .r .len{text-align:right}
 #v3d .stat{display:flex;gap:16px;font-family:var(--mono);font-size:11.5px;color:var(--tx2);white-space:nowrap}
 @media(max-width:820px){#v3d .wrap{flex-direction:column}#v3d .side{width:auto;border-left:0;border-top:1px solid var(--line);max-height:44%}}
+
+/* ================= part builder (Nauja detalė) ================= */
+header .grow{flex:1}
+#pbOpen{align-self:center;padding:8px 16px;font-size:13.5px}
+#pb{position:fixed;inset:0;z-index:40;background:var(--bg);display:grid;
+    grid-template-rows:auto minmax(0,1fr) auto;grid-template-columns:minmax(0,1fr);min-height:0}
+#pb[hidden]{display:none!important}
+.pb-bar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:8px 14px;background:var(--panel);
+        border-bottom:1px solid var(--line);box-shadow:0 1px 3px rgba(20,30,50,.06)}
+.pb-bar h2{margin:0 6px 0 0;font-size:16px;font-weight:650;white-space:nowrap}
+.pb-bar .nm{display:flex;align-items:center;gap:7px;font-size:12.5px;color:var(--tx2)}
+.pb-bar .nm input{width:230px;font-family:var(--mono);font-size:14px;font-weight:650;padding:7px 10px}
+.pb-bar .grow{flex:1}
+.pb-bar button{padding:7px 12px}
+.pb-main{display:grid;grid-template-columns:292px minmax(0,1fr) 318px;min-height:0}
+.pb-col{background:var(--panel);display:flex;flex-direction:column;min-height:0;overflow:auto}
+.pb-left{border-right:1px solid var(--line)}
+.pb-right{border-left:1px solid var(--line)}
+.pb-sec{padding:11px 13px;border-bottom:1px solid var(--line)}
+.pb-sec h3{margin:0 0 8px;font-size:11px;text-transform:uppercase;letter-spacing:.7px;color:var(--tx2);font-weight:650;
+           display:flex;align-items:center;gap:8px}
+.pb-sec h3 .n{background:var(--acc);color:#fff;border-radius:999px;width:18px;height:18px;display:inline-flex;
+              align-items:center;justify-content:center;font-size:11px;letter-spacing:0}
+.pb-sec h3 .cnt{margin-left:auto;font-family:var(--mono);text-transform:none;letter-spacing:0}
+
+/* field rows */
+.pb-f{display:flex;align-items:center;gap:6px;margin:0 0 7px;flex-wrap:wrap}
+.pb-f>.l{flex:0 0 74px;font-size:12.5px;color:var(--tx2)}
+.pb-f>.l.w{flex-basis:100%;margin-bottom:-2px}
+.pb-num{display:inline-flex;align-items:stretch;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--panel2)}
+.pb-num button{background:var(--panel2);color:var(--tx);border:0;border-radius:0;padding:0;width:34px;font-size:17px;
+               font-weight:500;line-height:1;touch-action:manipulation}
+.pb-num button:hover{background:#dbe3ec;filter:none}
+.pb-num input{width:74px;border:0;border-left:1px solid var(--line);border-right:1px solid var(--line);border-radius:0;
+              text-align:center;font-family:var(--mono);font-size:14px;font-weight:600;padding:7px 4px;background:#fff}
+.pb-num input:focus{outline:2px solid var(--acc);outline-offset:-2px}
+.pb-num input.bad{background:#fdecec;color:var(--bad)}
+.pb-num.dis{opacity:.45}
+.pb-num.dis button{pointer-events:none}
+.pb-u{font-size:12px;color:var(--tx2)}
+.pb-seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--panel2);flex-wrap:nowrap}
+.pb-seg button{background:transparent;color:var(--tx2);border:0;border-right:1px solid var(--line);border-radius:0;
+               padding:6px 9px;font-size:12.5px;font-weight:550}
+.pb-seg button:last-child{border-right:0}
+.pb-seg button:hover{background:#dbe3ec;filter:none;color:var(--tx)}
+.pb-seg button.on{background:var(--acc);color:#fff}
+.pb-seg.big button{padding:8px 13px;font-size:13.5px;font-family:var(--mono);font-weight:650}
+.pb-seg button:disabled{opacity:.35}
+.pb-chk{display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;padding:3px 0}
+.pb-chk input{width:17px;height:17px;accent-color:var(--acc);cursor:pointer}
+
+/* tiles */
+.pb-tiles{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.pb-tile{display:flex;align-items:center;gap:8px;text-align:left;background:#fff;color:var(--tx);
+         border:1px solid var(--line);border-radius:9px;padding:7px 8px;font-weight:600;font-size:12.5px;
+         white-space:normal;line-height:1.25}
+.pb-tile:hover{border-color:var(--acc);background:#eef4fe;filter:none}
+.pb-tile svg{flex:0 0 30px;width:30px;height:30px}
+.pb-tile small{display:block;font-weight:400;color:var(--tx2);font-size:11px;margin-top:1px}
+
+/* operations list */
+.pb-ops{flex:1;overflow:auto;min-height:70px}
+.pb-op{display:grid;grid-template-columns:26px 1fr auto;gap:8px;align-items:center;padding:6px 10px 6px 12px;
+       border-bottom:1px solid #dde4ec;cursor:pointer;position:relative}
+.pb-op:hover{background:var(--panel2)}
+.pb-op.sel{background:#ead9f3;box-shadow:inset 3px 0 0 var(--pick)}
+.pb-op svg{width:24px;height:24px}
+.pb-op .t{font-size:12.8px;font-weight:600;line-height:1.3}
+.pb-op .s{font-size:11.5px;color:var(--tx2);font-family:var(--mono);line-height:1.35}
+.pb-op .tg{font-family:var(--mono);font-size:10.5px;font-weight:700;padding:1px 6px;border-radius:5px;background:#e7f0ff;color:#14539e}
+.pb-op .tg.op2{background:#f1e6f8;color:#6a1b9a}
+.pb-op .tg.op3{background:#fff3df;color:#8a5a00}
+.pb-op .dot{position:absolute;left:4px;top:50%;width:6px;height:6px;margin-top:-3px;border-radius:50%}
+.pb-op .dot.err{background:var(--bad)} .pb-op .dot.warn{background:var(--warn)}
+.pb-empty{padding:14px;color:var(--tx2);font-size:12.5px;line-height:1.6}
+
+/* stage */
+.pb-stage{position:relative;min-width:0;min-height:0;background:var(--panel2)}
+.pb-stage svg{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none;user-select:none}
+.pb-stage .ov{position:absolute;left:10px;top:10px;display:flex;gap:8px;align-items:center;z-index:2}
+.pb-stage .ov label{background:rgba(248,250,252,.94);border:1px solid var(--line);border-radius:7px;padding:4px 10px;font-size:12px}
+.pb-stage .tip{position:absolute;right:12px;top:14px;font-size:11.5px;color:#8b97a6;pointer-events:none;text-align:right;max-width:46%}
+.pb-legend{position:absolute;left:10px;bottom:8px;display:flex;gap:12px;font-size:11.5px;color:var(--tx2);pointer-events:none;flex-wrap:wrap}
+.pb-legend i{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:4px;vertical-align:-1px}
+.pb-svg .op{cursor:pointer}
+.pb-svg .op.drag{cursor:grabbing}
+.pb-svg text{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+
+/* properties */
+.pb-ph{display:flex;align-items:center;gap:9px;padding:11px 13px;border-bottom:1px solid var(--line);background:#efe9f5}
+.pb-ph svg{width:30px;height:30px;flex:0 0 30px;color:var(--pick)}
+.pb-ph .t{font-weight:700;font-size:14px;flex:1;line-height:1.25}
+.pb-ph .t small{display:block;font-weight:500;color:var(--tx2);font-size:11.5px}
+.pb-ph button{padding:5px 9px;font-size:12px}
+.pb-ph .del{background:#fdecec;color:var(--bad);border:1px solid #f0b7b7}
+.pb-props{padding:11px 13px}
+.pb-props .grp{border-top:1px dashed var(--line);margin-top:9px;padding-top:9px}
+.pb-msgs{margin-top:10px;display:flex;flex-direction:column;gap:5px}
+.pb-msg{font-size:12.3px;line-height:1.45;padding:6px 9px;border-radius:7px;border:1px solid}
+.pb-msg.err{background:#fdecec;border-color:#f0b7b7;color:#9b1c1c}
+.pb-msg.warn{background:#fff6e5;border-color:#f0d199;color:#7a4d00}
+.pb-msg.info{background:#eef4fe;border-color:#c9dbf6;color:#1d4f91}
+.pb-hint{padding:18px 16px;color:var(--tx2);font-size:13px;line-height:1.7}
+.pb-hint b{color:var(--tx)}
+.pb-hint ul{margin:6px 0 0;padding-left:18px}
+.pb-picker{display:grid;grid-template-columns:repeat(3,auto);gap:4px;align-items:center;justify-content:start}
+.pb-picker button{background:var(--panel2);color:var(--tx2);border:1px solid var(--line);padding:5px 8px;font-size:12px;font-weight:550}
+.pb-picker button.on{background:var(--acc);color:#fff;border-color:var(--acc)}
+.pb-picker .pv{width:74px;height:44px;border:2px solid var(--edge, #3f4956);border-radius:3px;background:#fff;
+               display:flex;align-items:center;justify-content:center;font-size:10.5px;color:var(--tx2)}
+
+/* footer: programs */
+.pb-foot{display:flex;gap:10px;align-items:stretch;padding:9px 14px;background:var(--panel);border-top:1px solid var(--line)}
+.pb-progs{flex:1;display:flex;gap:8px;overflow-x:auto;min-width:0}
+.pb-prog{flex:0 0 auto;min-width:230px;max-width:330px;background:#fff;border:1px solid var(--line);border-radius:10px;padding:7px 10px}
+.pb-prog .h{display:flex;gap:7px;align-items:center}
+.pb-prog .op{font-family:var(--mono);font-weight:800;font-size:13px;color:#fff;background:var(--acc);border-radius:6px;padding:1px 7px}
+.pb-prog.k-flip .op,.pb-prog.k-flipOnly .op{background:#7b1fa2}
+.pb-prog.k-rot .op{background:#b26a00}
+.pb-prog .fn{font-family:var(--mono);font-size:11.5px;color:var(--tx2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1}
+.pb-prog .h button{padding:3px 8px;font-size:11.5px}
+.pb-prog .c{font-size:12px;color:var(--tx);margin-top:3px}
+.pb-prog .i{font-size:11.8px;color:var(--tx2);margin-top:2px;display:flex;gap:6px;align-items:center;line-height:1.35}
+.pb-prog .i svg{flex:0 0 44px;width:44px;height:26px}
+.pb-prog.none{display:flex;align-items:center;color:var(--tx2);font-size:12.5px;border-style:dashed;background:transparent}
+.pb-acts{display:flex;flex-direction:column;gap:6px;justify-content:center;min-width:220px}
+.pb-acts .st{font-size:12.5px;font-weight:600}
+.pb-acts .st.ok{color:var(--ok)} .pb-acts .st.bad{color:var(--bad);cursor:pointer;text-decoration:underline dotted}
+.pb-acts .row{display:flex;gap:6px}
+.pb-acts .row button{flex:1}
+#pbDl{background:var(--ok)}
+
+/* popovers / modal / toast */
+.pb-pop{position:fixed;z-index:45;background:var(--panel);border:1px solid var(--line);border-radius:10px;
+        box-shadow:0 10px 30px rgba(20,30,50,.18);width:360px;max-height:60vh;display:flex;flex-direction:column}
+.pb-pop .hd{padding:10px 13px;border-bottom:1px solid var(--line);font-weight:650;font-size:13px;display:flex;gap:8px;align-items:center}
+.pb-pop .hd span{flex:1}
+.pb-pop .bd{overflow:auto}
+.pb-lib{display:grid;grid-template-columns:1fr auto auto;gap:6px;align-items:center;padding:7px 13px;border-bottom:1px solid #dde4ec}
+.pb-lib .n{font-family:var(--mono);font-size:12.5px;font-weight:650}
+.pb-lib .m{font-size:11.5px;color:var(--tx2)}
+.pb-lib button{padding:4px 9px;font-size:12px}
+.pb-modal{position:fixed;inset:0;z-index:60;background:rgba(15,20,30,.45);display:flex;align-items:center;justify-content:center}
+.pb-modal .box{background:var(--panel);border-radius:12px;width:min(760px,94vw);max-height:86vh;display:flex;flex-direction:column;
+               box-shadow:0 20px 50px rgba(0,0,0,.3)}
+.pb-modal .hd{display:flex;gap:8px;align-items:center;padding:10px 14px;border-bottom:1px solid var(--line);font-weight:650}
+.pb-modal .hd span{flex:1;font-family:var(--mono)}
+.pb-modal pre{margin:0;padding:12px 14px;overflow:auto;font-family:var(--mono);font-size:12px;line-height:1.55;background:#fafcfe}
+.pb-toast{position:fixed;left:50%;bottom:120px;transform:translateX(-50%);z-index:70;background:#1b2330;color:#fff;
+          padding:10px 16px;border-radius:9px;font-size:13px;box-shadow:0 8px 24px rgba(0,0,0,.25);max-width:80vw}
+.pb-toast.bad{background:var(--bad)}
+
+@media(max-width:1100px){
+  .pb-main{grid-template-columns:250px minmax(0,1fr) 286px}
+  .pb-bar .nm input{width:170px}
+  .pb-bar button{padding:7px 10px}
+  .pb-prog{min-width:200px}
+}
+@media(max-width:900px){
+  #pb{overflow:auto;display:block}
+  .pb-main{display:flex;flex-direction:column}
+  .pb-stage{height:58vh}
+  .pb-col{overflow:visible}
+  .pb-foot{flex-direction:column}
+  .pb-bar{flex-wrap:wrap}
+  .pb-bar .nm input{width:160px}
+}
 </style>
 </head>
 <body>
@@ -219,6 +386,8 @@ body.dz-on .dzdep{display:inline-block}
     <h1>XXL Ašių taisyklė</h1>
     <div class="sub">SCM Startech CN Plus &middot; SWOOD CAM išvesties pasukimas 90&deg; &middot; <i>rotate programs so the long side runs along X</i></div>
   </div>
+  <span class="grow"></span>
+  <button id="pbOpen" title="Sukurti detalę ir jos programas rankomis">＋ Nauja detalė</button>
 </header>
 
 <main>
@@ -278,6 +447,60 @@ body.dz-on .dzdep{display:inline-block}
   </div>
   <div id="list"></div>
 </main>
+
+<div id="pb" hidden>
+  <div class="pb-bar">
+    <h2>Nauja detalė</h2>
+    <label class="nm">Pavadinimas <input type="text" id="pbName" spellcheck="false" autocomplete="off"></label>
+    <span class="grow"></span>
+    <button class="ghost" id="pbUndo" title="Atšaukti (Ctrl+Z)">↶ Atšaukti</button>
+    <button class="ghost" id="pbRedo" title="Grąžinti (Ctrl+Y)">↷</button>
+    <button class="ghost" id="pbLibBtn">Mano detalės ▾</button>
+    <button class="ghost" id="pbSave">Išsaugoti</button>
+    <button class="ghost" id="pbNew">Nauja</button>
+    <button class="ghost" id="pbClose">Uždaryti ✕</button>
+  </div>
+  <div class="pb-main">
+    <aside class="pb-col pb-left">
+      <div class="pb-sec">
+        <h3><span class="n">1</span> Plokštė</h3>
+        <div id="pbPanel"></div>
+      </div>
+      <div class="pb-sec">
+        <h3><span class="n">2</span> Pridėti operaciją</h3>
+        <div class="pb-tiles" id="pbTiles"></div>
+      </div>
+      <div class="pb-sec" style="border-bottom:0;padding-bottom:4px">
+        <h3><span class="n">3</span> Operacijos <span class="cnt" id="pbCount"></span></h3>
+      </div>
+      <div class="pb-ops" id="pbOps"></div>
+    </aside>
+    <div class="pb-stage" id="pbStage">
+      <svg class="pb-svg" id="pbSvg"></svg>
+      <div class="ov"><label class="pb-chk"><input type="checkbox" id="pbPath"> Rodyti frezos kelią</label></div>
+      <div class="pb-legend">
+        <span><i style="background:#1f6feb"></i>viršuje</span>
+        <span><i style="border:2px dashed #7b1fa2;width:8px;height:8px"></i>apačioje</span>
+        <span><i style="background:#d98200;border-radius:2px"></i>briaunoje</span>
+        <span><i style="background:#9fd3b6;border-radius:2px"></i>frezuojama</span>
+      </div>
+      <div class="tip">Vilkite operaciją pele &middot; rodyklės ±1 mm (Shift ±10) &middot; Delete — ištrinti</div>
+    </div>
+    <aside class="pb-col pb-right" id="pbRight"></aside>
+  </div>
+  <div class="pb-foot">
+    <div class="pb-progs" id="pbProgs"></div>
+    <div class="pb-acts">
+      <div class="st" id="pbStatus"></div>
+      <div class="row">
+        <button id="pbDl">⬇ Atsisiųsti</button>
+      </div>
+      <div class="row">
+        <button class="ghost" id="pbSend">→ Įrašyti į stakles</button>
+      </div>
+    </div>
+  </div>
+</div>
 
 <div id="v3d">
   <div class="bar">
@@ -2068,7 +2291,7 @@ var V3D = (function () {
           var outp = add(ax.p, mul(ax.dir, -40));
           move("rapid", [pos[0], pos[1], clear], "", id);
           move("rapid", [outp[0], outp[1], clear], "", id);
-          move("rapid", outp, "briauna F" + op.h.face, id);
+          move("rapid", outp, "briauna F" + (op.h.fF || op.h.face), id);
           move("plunge", add(ax.p, mul(ax.dir, ax.depth)), "⌀" + d + " gylis " + op.h.z, id);
           move("rapid", outp, "", id);
           move("rapid", [outp[0], outp[1], clear], "", id);
@@ -2392,7 +2615,7 @@ var V3D = (function () {
     Array.prototype.forEach.call(ui.which.children, function (b) { b.classList.toggle("sel", b.dataset.w === w); });
     var doc = docOf(cur, w);
     big.setScene(build(doc, cur.skip || {}, cur.sel || {}));
-    ui.name.textContent = cur.name + (w === "after" && cur.viewDoc ? "  (po pakeitimo)" : "  (originalas)");
+    ui.name.textContent = cur.name + (cur.plain ? "" : w === "after" && cur.viewDoc ? "  (po pakeitimo)" : "  (originalas)");
     var S = big.scene;
     ui.stat.innerHTML =
       '<span>' + S.DX + '×' + S.DY + '×' + S.DZ + ' mm</span>' +
@@ -2490,6 +2713,1675 @@ var V3D = (function () {
 
   return { open: open, refresh: refresh, create: function (cv, o) { return new Viewer(cv, o); },
            build: build, _build: build };
+})();
+</script>
+<script id="part-core">
+/* ============================================================================
+   PART — build a panel by hand and write its .XXL programs.
+
+   Writes exactly the dialect step2xxl writes (SWOOD CAM style, verified on the
+   machine), with step2xxl's rules:
+     - top face F=1; X=0 end F=3, X=DX end F=2 (SWOOD numbering — note this is
+       the opposite of the Maestro ChangePlane files the fixer parses);
+       on the end faces X is the height from the table, Y runs along the edge
+     - long edges: Ø8 drilled in place (F=4 front Y=0 / F=5 back Y=DY, X along,
+       Y height); other sizes go to a separate program with the panel rotated
+       90° CCW (front edge becomes the left end), only for panels ≤ 900 mm
+     - holes on the underside go to a 2OP program: panel turned over about the
+       X axis (Y mirrored); through holes always stay in 1OP
+     - through bores Z = -(DZ + 6.559) N="L"; marks ≤ 2 mm N="L"; others N="P"
+     - routing T=96, Ø15.5: never deeper than DZ - 2, never plunges vertically
+       into the board (ramp ≤ 30 mm along the path, back at full depth), never
+       more than 20 mm outside the panel (Maestro alarm NC17050)
+
+   Coordinates in the model: origin = front-left corner of the TOP face as it
+   lies on the machine (REFERENCE=LOWERLEFT), X along the length, Y across,
+   Y=0 = front edge. Every position is stored as a distance from the edge the
+   user measured it from, so it survives a change of panel size.
+============================================================================ */
+var PART = (function () {
+  "use strict";
+
+  var CFG = {
+    through_extra: 6.559,     // SWOOD: through bores go to -(DZ + 6.559)
+    mark_depth: 2,            // this shallow on the face => N="L"
+    drills_top: [5, 8, 15, 35],
+    drills_through: [5, 8],
+    drills_x_ends: [5, 8],    // horizontal spindles on the X ends
+    drills_y_edges: [8],      // horizontal spindles reaching the long edges in place
+    edge_max_depth: 35,
+    face_left: 3, face_right: 2, face_front: 4, face_back: 5,
+    rout: { T: 96, dia: 15.5, D: 24, name: "DEIMANTAS 16MM  - NAUJA - " },
+    feed_cut: 4000, feed_plunge: 2000, safe_z: 10,
+    rout_skin: 2, ramp: 30, lead_in: 5, air: 20,
+    min_circle: 20,
+    max_dx: 3050, max_dy: 900, min_dx: 200, min_dy: 80,
+    header: 'H DX={DX} DY={DY} DZ={DZ} BX=0 BY=0 BZ=21 -EH T=0 *MM /"DEF" R=1 V=0'
+  };
+  var R = CFG.rout.dia / 2;
+  var LEAD = CFG.lead_in + R;            // tool centre this far outside an edge on entry/exit
+  var EPS = 1e-6;
+
+  /* default depths a shop uses for each drill */
+  var DEPTH = { top: { 5: 12, 8: 12, 15: 13, 35: 13 }, edge: { 5: 32, 8: 27 } };
+
+  /* ---------------------------------------------------------------- numbers */
+  function num(v) {                       // Xilog style: no trailing zeros, ≤ 6 decimals
+    v = Math.round(v * 1e6) / 1e6;
+    if (Math.abs(v - Math.round(v)) < 1e-9) { v = Math.round(v); return String(v === 0 ? 0 : v); }
+    return v.toFixed(6).replace(/0+$/, "").replace(/\.$/, "");
+  }
+  function r1(v) { return Math.round(v * 10) / 10; }
+  function fin(v) { return typeof v === "number" && isFinite(v); }
+
+  /* ---------------------------------------------------------------- model */
+  var uid = 1;
+  function nextId(part) {
+    var m = 0; (part.ops || []).forEach(function (o) { if (o.id > m) m = o.id; });
+    return Math.max(m + 1, uid++);
+  }
+
+  function blank() {
+    return { v: 1, name: "DETALE_1", DX: 600, DY: 400, DZ: 18, ops: [] };
+  }
+
+  /* A new operation of the given kind, with defaults that make sense on this
+     panel straight away (visible, inside, valid). */
+  function make(kind, part) {
+    var DX = part.DX, DY = part.DY, DZ = part.DZ, o;
+    switch (kind) {
+      case "hole":
+        o = { kind: "hole", face: "T", d: 8, depth: DEPTH.top[8], through: false,
+              x: 50, xr: "L", y: 50, yr: "F", n: 1, step: 32, dir: "X", mx: false, my: false };
+        break;
+      case "shelf":      // shelf-pin rows: Ø5 × 12, every 32 mm, 37 from front and back
+        o = { kind: "hole", face: "T", d: 5, depth: DEPTH.top[5], through: false,
+              x: 0, xr: "C", y: 37, yr: "F", n: Math.max(1, Math.min(9, Math.floor((DX - 100) / 32))),
+              step: 32, dir: "X", mx: false, my: true, preset: "shelf" };
+        break;
+      case "hinge":      // hinge cups: Ø35 × 13, centre 22.5 from the front edge, 100 from each end
+        o = { kind: "hole", face: "T", d: 35, depth: DEPTH.top[35], through: false,
+              x: 100, xr: "L", y: 22.5, yr: "F", n: 1, step: 32, dir: "X", mx: true, my: false, preset: "hinge" };
+        break;
+      case "edge":
+        o = { kind: "edge", edge: "L", d: 8, depth: DEPTH.edge[8], h: DZ / 2, hc: true,
+              s: 50, sr: "F", n: 1, step: 32, both: false };
+        break;
+      case "groove":
+        o = { kind: "groove", face: "T", dir: "X", p: 50, pr: "B", w: 16, depth: Math.min(8, DZ - CFG.rout_skin),
+              full: true, a: 50, ar: "L", len: Math.max(50, Math.round(DX / 2)) };
+        break;
+      case "notch":
+        o = { kind: "notch", corner: "BR", a: 50, b: 50 };
+        break;
+      case "cut":
+        o = { kind: "cut", x: 0, xr: "C", y: 0, yr: "C", w: Math.min(200, Math.round(DX / 3)), h: Math.min(100, Math.round(DY / 3)) };
+        break;
+      case "circle":
+        o = { kind: "circle", x: 0, xr: "C", y: 0, yr: "C", D: 60 };
+        break;
+      default: return null;
+    }
+    o.id = nextId(part);
+    return o;
+  }
+
+  /* ------------------------------------------------------ positions */
+  // distance v from edge ref -> absolute coordinate on an axis of length L
+  function abs(v, ref, L) {
+    if (ref === "C") return L / 2;
+    return (ref === "L" || ref === "F") ? v : L - v;
+  }
+  // absolute coordinate -> distance from ref edge
+  function rel(c, ref, L) {
+    if (ref === "C") return 0;
+    return (ref === "L" || ref === "F") ? c : L - c;
+  }
+  // i-th of n instances, stepping away from the reference edge (centred groups stay centred)
+  function stepOff(i, n, step, ref) {
+    if (ref === "C") return (i - (n - 1) / 2) * step;
+    return (ref === "L" || ref === "F" ? 1 : -1) * i * step;
+  }
+  function cnt(o) { return Math.max(1, Math.min(200, Math.round(o.n || 1))); }
+
+  /* every physical hole of a hole op: [{x, y, sx, sy}] — sx/sy = ±1, how this
+     instance moves when the base moves (mirrored copies move the other way) */
+  function holePts(o, P) {
+    var n = cnt(o), bx = abs(o.x, o.xr, P.DX), by = abs(o.y, o.yr, P.DY), out = [];
+    for (var i = 0; i < n; i++) {
+      var x = bx, y = by;
+      if (o.dir === "Y") y += stepOff(i, n, o.step, o.yr); else x += stepOff(i, n, o.step, o.xr);
+      out.push({ x: x, y: y, sx: 1, sy: 1, k: i });
+    }
+    var base = out.slice();
+    function add(p) {
+      if (!out.some(function (q) { return Math.abs(q.x - p.x) < 1e-6 && Math.abs(q.y - p.y) < 1e-6; })) out.push(p);
+    }
+    if (o.mx) base.forEach(function (p) { add({ x: P.DX - p.x, y: p.y, sx: -1, sy: 1, k: p.k }); });
+    if (o.my) base.forEach(function (p) { add({ x: p.x, y: P.DY - p.y, sx: 1, sy: -1, k: p.k }); });
+    if (o.mx && o.my) base.forEach(function (p) { add({ x: P.DX - p.x, y: P.DY - p.y, sx: -1, sy: -1, k: p.k }); });
+    return out;
+  }
+
+  var OPP = { L: "R", R: "L", F: "B", B: "F" };
+  function edgeLen(edge, P) { return edge === "L" || edge === "R" ? P.DY : P.DX; }
+  function edgeH(o, P) { return o.hc ? P.DZ / 2 : o.h; }
+
+  /* every edge hole: [{edge, s (along, machine coords), t (height), sx}] */
+  function edgePts(o, P) {
+    var L = edgeLen(o.edge, P), n = cnt(o), b = abs(o.s, o.sr, L), out = [];
+    for (var i = 0; i < n; i++) out.push({ edge: o.edge, s: b + stepOff(i, n, o.step, o.sr), t: edgeH(o, P), sx: 1, k: i });
+    if (o.both) out.slice().forEach(function (p) { out.push({ edge: OPP[p.edge], s: p.s, t: p.t, sx: 1, k: p.k, opp: true }); });
+    return out;
+  }
+  function edgePoint(edge, s, P) {        // where an edge hole enters, in plan
+    switch (edge) {
+      case "L": return [0, s];
+      case "R": return [P.DX, s];
+      case "F": return [s, 0];
+      case "B": return [s, P.DY];
+    }
+  }
+
+  /* groove walls: {dir, c0, c1 (across), a0, a1 (along), open0, open1} */
+  function grooveBox(o, P) {
+    var across = o.dir === "X" ? P.DY : P.DX, along = o.dir === "X" ? P.DX : P.DY, c0, c1, a0, a1;
+    if (o.pr === "C") { c0 = (across - o.w) / 2; c1 = c0 + o.w; }
+    else if (o.pr === "F" || o.pr === "L") { c0 = o.p; c1 = o.p + o.w; }
+    else { c1 = across - o.p; c0 = c1 - o.w; }
+    if (o.full) { a0 = 0; a1 = along; }
+    else if (o.ar === "C") { a0 = (along - o.len) / 2; a1 = a0 + o.len; }
+    else if (o.ar === "L" || o.ar === "F") { a0 = o.a; a1 = o.a + o.len; }
+    else { a1 = along - o.a; a0 = a1 - o.len; }
+    return { dir: o.dir, c0: c0, c1: c1, a0: a0, a1: a1, along: along, across: across,
+             open0: a0 <= 1e-6, open1: a1 >= along - 1e-6 };
+  }
+  // the same box as a plan rectangle
+  function grooveRect(g) {
+    return g.dir === "X" ? { x0: g.a0, x1: g.a1, y0: g.c0, y1: g.c1 } : { x0: g.c0, x1: g.c1, y0: g.a0, y1: g.a1 };
+  }
+
+  function cutRect(o, P) {
+    var x0, y0;
+    if (o.xr === "C") x0 = (P.DX - o.w) / 2; else if (o.xr === "L") x0 = o.x; else x0 = P.DX - o.x - o.w;
+    if (o.yr === "C") y0 = (P.DY - o.h) / 2; else if (o.yr === "F") y0 = o.y; else y0 = P.DY - o.y - o.h;
+    return { x0: x0, y0: y0, x1: x0 + o.w, y1: y0 + o.h };
+  }
+  function notchRect(o, P) {
+    var L = o.corner[1] === "L", F = o.corner[0] === "F";
+    return { x0: L ? 0 : P.DX - o.a, x1: L ? o.a : P.DX, y0: F ? 0 : P.DY - o.b, y1: F ? o.b : P.DY };
+  }
+  function circleC(o, P) { return { x: abs(o.x, o.xr, P.DX), y: abs(o.y, o.yr, P.DY), D: o.D }; }
+
+  /* ------------------------------------------------------ validation */
+  function lst(a) { return a.join(", "); }
+
+  function check(part) {
+    var P = part, out = { panel: [], ops: {}, errors: 0, warns: 0 };
+    function add(id, level, msg) {
+      var arr = id == null ? out.panel : (out.ops[id] = out.ops[id] || []);
+      arr.push({ level: level, msg: msg });
+      if (level === "err") out.errors++; else if (level === "warn") out.warns++;
+    }
+    if (!fin(P.DX) || !fin(P.DY) || !fin(P.DZ) || P.DX <= 0 || P.DY <= 0 || P.DZ <= 0) {
+      add(null, "err", "Įveskite plokštės ilgį, plotį ir storį.");
+      return out;
+    }
+    if (!String(P.name || "").trim()) add(null, "err", "Įveskite detalės pavadinimą — juo bus pavadintos programos.");
+    if (P.DY > P.DX) add(null, "warn", "Ilgoji pusė turi eiti išilgai X — plokštė guli skersai. Paspauskite „Pasukti detalę 90°“.");
+    if (P.DX > CFG.max_dx) add(null, "err", "Per ilga: staklės priima iki " + CFG.max_dx + " mm išilgai X.");
+    if (P.DY > CFG.max_dy) add(null, "err", "Per plati: staklės priima iki " + CFG.max_dy + " mm išilgai Y.");
+    if (P.DX < CFG.min_dx || P.DY < CFG.min_dy) add(null, "warn", "Maža detalė (staklių minimumas " + CFG.min_dx + "×" + CFG.min_dy + " mm) — patikrinkite, ar ją prilaikys.");
+    if (P.DZ > 30) add(null, "warn", "Storis " + num(P.DZ) + " mm — neįprastai stora plokštė.");
+    if (!P.ops.length) add(null, "info", "Pridėkite bent vieną operaciją.");
+
+    var routMax = P.DZ - CFG.rout_skin;
+    var voids = [];          // routed-away areas, to warn about holes falling into them
+    P.ops.forEach(function (o) {
+      if (o.kind === "notch") voids.push(notchRect(o, P));
+      if (o.kind === "cut") voids.push(cutRect(o, P));
+    });
+    var grooves = [];        // routed grooves, per face
+    P.ops.forEach(function (o) {
+      if (o.kind === "groove" && fin(o.w) && fin(o.p) && (o.full || (fin(o.a) && fin(o.len)))) {
+        var r = grooveRect(grooveBox(o, P)); r.face = o.face; grooves.push(r);
+      }
+    });
+    function within(v, x, y, r) {          // does a hole of radius r touch the rectangle?
+      var dx = Math.max(v.x0 - x, 0, x - v.x1), dy = Math.max(v.y0 - y, 0, y - v.y1);
+      return Math.hypot(dx, dy) < r - 0.01;
+    }
+    function inVoid(x, y, r) { return voids.some(function (v) { return within(v, x, y, r); }); }
+    function inGroove(x, y, r, face) {
+      return grooves.some(function (v) { return (face === "X" || v.face === face) && within(v, x, y, r); });
+    }
+
+    var allTop = [];
+    P.ops.forEach(function (o) {
+      var id = o.id;
+      function need() {
+        for (var i = 0; i < arguments.length; i++) {
+          var v = o[arguments[i]];
+          if (!fin(v)) { add(id, "err", "Neteisingas skaičius."); return false; }
+        }
+        return true;
+      }
+      if (o.kind === "hole") {
+        if (!need("d", "depth", "x", "y", "n", "step")) return;
+        if (CFG.drills_top.indexOf(o.d) < 0) add(id, "err", "Grąžto Ø" + num(o.d) + " nėra. Iš viršaus: Ø" + lst(CFG.drills_top) + ".");
+        if (o.through && CFG.drills_through.indexOf(o.d) < 0) add(id, "err", "Kiaurai gręžia tik Ø" + lst(CFG.drills_through) + " grąžtai.");
+        if (!o.through) {
+          if (o.depth <= 0) add(id, "err", "Gylis turi būti didesnis už 0.");
+          else if (o.depth >= P.DZ) add(id, "err", "Gylis " + num(o.depth) + " ≥ storis " + num(P.DZ) + ". Pažymėkite „Kiaurai“ arba sumažinkite gylį.");
+          else if (P.DZ - o.depth < 2) add(id, "warn", "Liks tik " + num(P.DZ - o.depth) + " mm medžiagos — gali prasimušti.");
+        }
+        if (cnt(o) > 1 && !(o.step > 0)) add(id, "err", "Žingsnis turi būti didesnis už 0.");
+        var pts = holePts(o, P), out_ = 0, edge_ = 0, vo = 0, gr = 0, r = o.d / 2;
+        pts.forEach(function (p) {
+          if (p.x < 0 || p.x > P.DX || p.y < 0 || p.y > P.DY) out_++;
+          else if (p.x - r < -0.01 || p.x + r > P.DX + 0.01 || p.y - r < -0.01 || p.y + r > P.DY + 0.01) edge_++;
+          if (inVoid(p.x, p.y, r)) vo++;
+          else if (inGroove(p.x, p.y, r, o.through ? "X" : o.face)) gr++;
+          allTop.push({ x: p.x, y: p.y, r: r, id: id, face: o.through ? "X" : o.face });
+        });
+        if (out_) add(id, "err", (pts.length > 1 ? out_ + " iš " + pts.length + " skylių" : "Skylė") + " už plokštės ribų.");
+        if (edge_) add(id, "warn", (pts.length > 1 ? edge_ + " skylės" : "Skylė") + " išlenda pro plokštės kraštą.");
+        if (vo) add(id, "warn", (pts.length > 1 ? vo + " skylės patenka" : "Skylė patenka") + " į išpjovą.");
+        if (gr) add(id, "warn", (pts.length > 1 ? gr + " skylės patenka" : "Skylė patenka") + " į griovelį.");
+      }
+      else if (o.kind === "edge") {
+        if (!need("d", "depth", "s", "n", "step") || (!o.hc && !need("h"))) return;
+        var longEdge = o.edge === "F" || o.edge === "B";
+        if (!longEdge && CFG.drills_x_ends.indexOf(o.d) < 0)
+          add(id, "err", "Galuose (kairėje / dešinėje) gręžia tik Ø" + lst(CFG.drills_x_ends) + ".");
+        if (longEdge && CFG.drills_y_edges.indexOf(o.d) < 0) {
+          if (CFG.drills_x_ends.indexOf(o.d) < 0) add(id, "err", "Grąžto Ø" + num(o.d) + " briaunoms nėra (yra Ø" + lst(CFG.drills_x_ends) + ").");
+          else if (P.DX > CFG.max_dy) add(id, "err", "Ø" + num(o.d) + " ilgojoje briaunoje gręžiamas tik pasukus plokštę 90°, o ji ilgesnė nei " + CFG.max_dy + " mm. Naudokite Ø8 arba gręžkite rankomis.");
+          else add(id, "info", "Ø" + num(o.d) + " ilgojoje briaunoje — atskira programa, plokštę pasukus 90°.");
+        }
+        if (longEdge && CFG.drills_y_edges.indexOf(o.d) >= 0)
+          add(id, "info", "Ø" + num(o.d) + " ilgojoje briaunoje gręžiama vietoje (F=" + CFG.face_front + "/F=" + CFG.face_back + ") — pirmą kartą patikrinkite Maestro peržiūroje.");
+        if (o.depth <= 0) add(id, "err", "Gylis turi būti didesnis už 0.");
+        else if (o.depth > CFG.edge_max_depth) add(id, "err", "Briaunų grąžtai siekia tik " + CFG.edge_max_depth + " mm.");
+        if (cnt(o) > 1 && !(o.step > 0)) add(id, "err", "Žingsnis turi būti didesnis už 0.");
+        var t = edgeH(o, P);
+        if (t - o.d / 2 < -0.01 || t + o.d / 2 > P.DZ + 0.01) add(id, "err", "Aukštis " + num(t) + " — skylė išeina pro plokštumą (storis " + num(P.DZ) + ").");
+        var ep = edgePts(o, P), bad = 0;
+        ep.forEach(function (p) { var L = edgeLen(p.edge, P); if (p.s - o.d / 2 < -0.01 || p.s + o.d / 2 > L + 0.01) bad++; });
+        if (bad) add(id, "err", (ep.length > 1 ? bad + " iš " + ep.length + " skylių" : "Skylė") + " už briaunos ribų.");
+        var opposite = { L: P.DX, R: P.DX, F: P.DY, B: P.DY }[o.edge];
+        if (o.depth >= opposite) add(id, "err", "Gylis didesnis už plokštės matmenį.");
+      }
+      else if (o.kind === "groove") {
+        if (!need("p", "w", "depth") || (!o.full && !need("a", "len"))) return;
+        if (o.w < CFG.rout.dia - 0.01) add(id, "err", "Freza Ø" + num(CFG.rout.dia) + " — siauresnio nei " + num(CFG.rout.dia) + " mm griovelio padaryti negalima (pjūklo grioveliai dar nepalaikomi).");
+        if (o.depth <= 0) add(id, "err", "Gylis turi būti didesnis už 0.");
+        else if (o.depth > routMax + 1e-6) add(id, "err", "Frezuojant paliekama " + CFG.rout_skin + " mm — didžiausias gylis " + num(routMax) + " mm.");
+        var g = grooveBox(o, P);
+        if (g.c0 < -0.01 || g.c1 > g.across + 0.01) add(id, "err", "Griovelis už plokštės ribų.");
+        if (!o.full) {
+          if (o.len <= 0) add(id, "err", "Ilgis turi būti didesnis už 0.");
+          else if (g.a0 < -0.01 || g.a1 > g.along + 0.01) add(id, "err", "Griovelis ilgesnis nei plokštė.");
+          else if ((!g.open0 || !g.open1) && g.a1 - g.a0 < CFG.rout.dia - 0.01) add(id, "err", "Uždaras griovelis trumpesnis už frezą (Ø" + num(CFG.rout.dia) + ").");
+          else if (!g.open0 || !g.open1) add(id, "info", "Uždari griovelio galai bus apvalūs (R" + num(R) + ").");
+        }
+      }
+      else if (o.kind === "notch") {
+        if (!need("a", "b")) return;
+        if (o.a <= 0 || o.b <= 0) add(id, "err", "Išpjovos matmenys turi būti didesni už 0.");
+        else if (o.a >= P.DX || o.b >= P.DY) add(id, "err", "Išpjova didesnė už plokštę.");
+        else add(id, "info", "Frezuojama paliekant " + CFG.rout_skin + " mm — atlaužkite rankomis. Vidinis kampas R" + num(R) + ".");
+      }
+      else if (o.kind === "cut") {
+        if (!need("w", "h") || (o.xr !== "C" && !need("x")) || (o.yr !== "C" && !need("y"))) return;
+        var c = cutRect(o, P);
+        if (o.w <= CFG.rout.dia + 0.4 || o.h <= CFG.rout.dia + 0.4) add(id, "err", "Per maža išpjova frezai Ø" + num(CFG.rout.dia) + " — mažiausiai " + num(Math.ceil(CFG.rout.dia + 0.5)) + " mm.");
+        else if (c.x0 < 1 || c.y0 < 1 || c.x1 > P.DX - 1 || c.y1 > P.DY - 1) add(id, "err", "Išpjova turi būti plokštės viduje (kampams — „Kampo išpjova“).");
+        else add(id, "info", "Frezuojama paliekant " + CFG.rout_skin + " mm — išlaužkite rankomis. Kampai R" + num(R) + ".");
+      }
+      else if (o.kind === "circle") {
+        if (!need("D") || (o.xr !== "C" && !need("x")) || (o.yr !== "C" && !need("y"))) return;
+        var cc = circleC(o, P);
+        if (o.D < CFG.min_circle) add(id, "err", "Mažiausia frezuojama kiaurymė Ø" + CFG.min_circle + " (mažesnes — grąžtu Ø" + lst(CFG.drills_top) + ").");
+        else if (cc.x - o.D / 2 < 1 || cc.y - o.D / 2 < 1 || cc.x + o.D / 2 > P.DX - 1 || cc.y + o.D / 2 > P.DY - 1) add(id, "err", "Kiaurymė turi būti plokštės viduje.");
+        else add(id, "info", "Frezuojama paliekant " + CFG.rout_skin + " mm — išlaužkite rankomis.");
+      }
+    });
+
+    // holes drilled into each other
+    var hit = {};
+    for (var i = 0; i < allTop.length; i++) for (var j = i + 1; j < allTop.length; j++) {
+      var a = allTop[i], b = allTop[j];
+      if (a.face !== b.face && a.face !== "X" && b.face !== "X") continue;   // other face, different depth layer
+      if (Math.hypot(a.x - b.x, a.y - b.y) < a.r + b.r - 0.01) { hit[a.id] = 1; hit[b.id] = 1; }
+    }
+    Object.keys(hit).forEach(function (id) { add(+id, "warn", "Persidengia su kita skyle."); });
+    return out;
+  }
+
+  /* ------------------------------------------------------ routing paths */
+  /* A path is a start point and segments {t:"L", x, y} / {t:"A", x, y, i, j, g}.
+     route() turns it into machine moves with the ramp entry:
+        rapid above the start, down to the surface, down along the path over
+        ≤ 30 mm to full depth, back to the start at full depth, the path, lift. */
+  function polyOf(start, segs) {            // the path as points (arcs as short chords)
+    var pts = [[start[0], start[1]]], cur = start;
+    segs.forEach(function (s) {
+      if (s.t === "A") {
+        var r = Math.hypot(cur[0] - s.i, cur[1] - s.j);
+        var a0 = Math.atan2(cur[1] - s.j, cur[0] - s.i), a1 = Math.atan2(s.y - s.j, s.x - s.i), d = a1 - a0;
+        if (s.g === 3) { while (d <= 1e-9) d += 2 * Math.PI; } else { while (d >= -1e-9) d -= 2 * Math.PI; }
+        var n = Math.max(2, Math.ceil(Math.abs(d) * r / 3));
+        for (var k = 1; k <= n; k++) pts.push([s.i + r * Math.cos(a0 + d * k / n), s.j + r * Math.sin(a0 + d * k / n)]);
+      } else pts.push([s.x, s.y]);
+      cur = [s.x, s.y];
+    });
+    return pts;
+  }
+  function route(start, segs, depth, name) {
+    var z = -depth, mv = [], poly = polyOf(start, segs);
+    mv.push({ t: "G0", x: start[0], y: start[1], z: CFG.safe_z });
+    mv.push({ t: "L", x: start[0], y: start[1], z: 0, v: CFG.feed_plunge });
+    // ramp: the first ≤ 30 mm of the path, as chords
+    var ramp = [], acc = 0;
+    for (var i = 1; i < poly.length && acc < CFG.ramp - 1e-9; i++) {
+      var a = poly[i - 1], b = poly[i], L = Math.hypot(b[0] - a[0], b[1] - a[1]);
+      if (L < 1e-9) continue;
+      if (acc + L >= CFG.ramp) { var f = (CFG.ramp - acc) / L; ramp.push([a[0] + (b[0] - a[0]) * f, a[1] + (b[1] - a[1]) * f]); acc = CFG.ramp; }
+      else { ramp.push(b); acc += L; }
+    }
+    var run = 0, prev = start;
+    ramp.forEach(function (p) {
+      run += Math.hypot(p[0] - prev[0], p[1] - prev[1]); prev = p;
+      mv.push({ t: "L", x: p[0], y: p[1], z: z * run / acc, v: CFG.feed_plunge });
+    });
+    for (var k = ramp.length - 2; k >= 0; k--) mv.push({ t: "L", x: ramp[k][0], y: ramp[k][1], z: z, v: CFG.feed_cut });
+    mv.push({ t: "L", x: start[0], y: start[1], z: z, v: CFG.feed_cut });
+    var cur = start;
+    segs.forEach(function (s) {
+      if (s.t === "A") mv.push({ t: "A", x: s.x, y: s.y, z: z, i: s.i, j: s.j, g: s.g, v: CFG.feed_cut });
+      else mv.push({ t: "L", x: s.x, y: s.y, z: z, v: CFG.feed_cut });
+      cur = [s.x, s.y];
+    });
+    mv.push({ t: "L", x: cur[0], y: cur[1], z: CFG.safe_z, v: CFG.feed_cut });
+    return { name: name, moves: mv };
+  }
+
+  function groovePaths(g, depth) {         // g in program coordinates
+    var W = g.c1 - g.c0, centres;
+    if (W <= CFG.rout.dia + 0.5 + 1e-9) {
+      // one pass along the wall nearer the middle of the panel (step2xxl)
+      var mid = g.across / 2;
+      centres = [Math.abs(g.c1 - mid) < Math.abs(g.c0 - mid) ? g.c1 - R : g.c0 + R];
+    } else {
+      var n = Math.ceil((W - CFG.rout.dia) / (CFG.rout.dia * 0.8)) + 1;
+      centres = [];
+      for (var k = 0; k < n; k++) centres.push(g.c0 + R + (W - CFG.rout.dia) * k / (n - 1));
+    }
+    var s0 = g.open0 ? -LEAD : g.a0 + R, s1 = g.open1 ? g.along + LEAD : g.a1 - R;
+    function P(along, across) { return g.dir === "X" ? [along, across] : [across, along]; }
+    var start = P(s0, centres[0]), segs = [];
+    centres.forEach(function (c, k) {
+      var from = k % 2 ? s1 : s0, to = k % 2 ? s0 : s1;
+      if (k) segs.push(mk(P(from, c)));
+      segs.push(mk(P(to, c)));
+    });
+    function mk(p) { return { t: "L", x: p[0], y: p[1] }; }
+    return route(start, segs, depth, "GROOVE");
+  }
+
+  function notchPath(nr, P) {               // through notch at a corner, tool in the waste, panel on the right
+    var L = nr.x0 <= 1e-9, F = nr.y0 <= 1e-9;
+    var a = nr.x1 - nr.x0, b = nr.y1 - nr.y0;
+    // canonical front-left notch [0,a]x[0,b]
+    var pts = [[a - R, -LEAD], [a - R, b - R], [-LEAD, b - R]];
+    pts = pts.map(function (p) { return [L ? p[0] : P.DX - p[0], F ? p[1] : P.DY - p[1]]; });
+    if (L !== F) pts.reverse();               // one mirror flips the side the panel is on
+    return route(pts[0], pts.slice(1).map(function (p) { return { t: "L", x: p[0], y: p[1] }; }), P.DZ - CFG.rout_skin, "NOTCH");
+  }
+  function cutPath(c, P) {                  // closed pocket-through, counter-clockwise, panel outside
+    var x0 = c.x0 + R, y0 = c.y0 + R, x1 = c.x1 - R, y1 = c.y1 - R;
+    return route([x0, y0], [{ t: "L", x: x1, y: y0 }, { t: "L", x: x1, y: y1 }, { t: "L", x: x0, y: y1 }, { t: "L", x: x0, y: y0 }],
+                 P.DZ - CFG.rout_skin, "CUTOUT");
+  }
+  function circlePath(cc, P) {
+    var r = cc.D / 2 - R, x = cc.x, y = cc.y;
+    var segs = [[x, y + r], [x - r, y], [x, y - r], [x + r, y]].map(function (p) {
+      return { t: "A", x: p[0], y: p[1], i: x, j: y, g: 3 };       // G=3 counter-clockwise
+    });
+    return route([x + r, y], segs, P.DZ - CFG.rout_skin, "CIRCLE");
+  }
+
+  /* ------------------------------------------------------ programs */
+  function cleanName(s) {
+    var map = { "ą": "a", "č": "c", "ę": "e", "ė": "e", "į": "i", "š": "s", "ų": "u", "ū": "u", "ž": "z",
+                "Ą": "A", "Č": "C", "Ę": "E", "Ė": "E", "Į": "I", "Š": "S", "Ų": "U", "Ū": "U", "Ž": "Z" };
+    return String(s || "").replace(/[ąčęėįšųūžĄČĘĖĮŠŲŪŽ]/g, function (c) { return map[c]; })
+      .replace(/\s+/g, "_").replace(/[^A-Za-z0-9_\-.]/g, "").replace(/^[.\-]+/, "").slice(0, 60);
+  }
+
+  function writeXXL(prog, P) {
+    var L = [];
+    L.push(CFG.header.replace("{DX}", num(prog.DX)).replace("{DY}", num(prog.DY)).replace("{DZ}", num(P.DZ)));
+    (prog.comment || []).forEach(function (c) { L.push("; " + c); });
+    L.push("; Machine Type:  ZapPZmN", ";Ensemble : ", ";Piece : ", ";Ref : ",
+           ";Fichier : " + prog.name, ";** Date codage : XXL Fix");
+    if (prog.bores.length) {
+      L.push("; ------ BP_SCM_DRILLING_BLOCK");
+      prog.bores.forEach(function (b) {
+        L.push(" XBO X=" + num(b.X) + " Y=" + num(b.Y) + " Z=" + num(b.Z) + " D=" + num(b.D) +
+               ' N="' + b.N + '" F=' + b.F + " R=1#");
+      });
+    }
+    if (prog.routes.length) {
+      L.push("; ------ " + CFG.rout.name);
+      prog.routes.forEach(function (rt) {
+        L.push("; ***** " + rt.name);
+        rt.moves.forEach(function (m) {
+          if (m.t === "G0") L.push(" XG0 X=" + num(m.x) + " Y=" + num(m.y) + " Z=" + num(m.z) + " T=" + CFG.rout.T +
+                                   " C=0 V=" + CFG.feed_plunge + " D=" + CFG.rout.D + " F=1");
+          else if (m.t === "A") L.push(" XA2P X=" + num(m.x) + " Y=" + num(m.y) + " Z=" + num(m.z) +
+                                       " I=" + num(m.i) + " J=" + num(m.j) + " G=" + m.g + " V=" + m.v);
+          else L.push(" XL2P X=" + num(m.x) + " Y=" + num(m.y) + " Z=" + num(m.z) + " V=" + m.v);
+        });
+      });
+    }
+    L.push(";**********************************************************", ".END",
+           ";**********************************************************", ";FINEPROG");
+    return L.join("\r\n") + "\r\n";
+  }
+
+  /* a document the 3D viewer understands (viewer face 2 = X=0 end, 3 = X=DX end) */
+  function viewDoc(prog, P) {
+    var holes = prog.bores.map(function (b, k) {
+      return { face: b.vface, fF: b.F, x: b.vx, y: b.vy, z: b.Z, d: b.D, t: b.vt, op: k, line: k };
+    });
+    var paths = prog.routes.map(function (rt, k) {
+      return { op: holes.length + k, line: holes.length + k, d: CFG.rout.dia, tool: String(CFG.rout.T), name: rt.name,
+               pts: rt.moves.map(function (m) {
+                 return m.t === "A" ? [m.x, m.y, m.z, 0, m.i, m.j, m.g] : [m.x, m.y, m.z, m.t === "G0" ? 1 : 0];
+               }) };
+    });
+    return { DX: prog.DX, DY: prog.DY, DZ: P.DZ, holes: holes, paths: paths, zfast: null,
+             warnings: [], errors: [], faceUse: {}, lines: [] };
+  }
+
+  var VFACE = { L: 2, R: 3, F: 4, B: 5 };
+
+  function build(part) {
+    var P = part, chk = check(part);
+    var res = { check: chk, programs: [], ok: chk.errors === 0 };
+    if (chk.errors) return res;
+
+    var p1 = { bores: [], routes: [] }, p2 = { bores: [], routes: [] }, pr = { bores: [] };
+    var DX = P.DX, DY = P.DY, DZ = P.DZ;
+
+    function vbore(F, X, Y, Z, D, N, sortx, plan) {
+      return { F: F, X: X, Y: Y, Z: Z, D: D, N: N, sortx: sortx,
+               vface: plan.vface, vx: plan.x, vy: plan.y, vt: plan.t, op: plan.op };
+    }
+
+    P.ops.forEach(function (o) {
+      if (o.kind === "hole") {
+        holePts(o, P).forEach(function (p) {
+          if (o.through) {
+            p1.bores.push(vbore(1, p.x, p.y, -(DZ + CFG.through_extra), o.d, "L", p.x, { vface: 1, x: p.x, y: p.y, op: o.id }));
+          } else {
+            var N = o.depth <= CFG.mark_depth + 1e-9 ? "L" : "P";
+            if (o.face === "B") {
+              var y2 = DY - p.y;                      // turned over about X
+              p2.bores.push(vbore(1, p.x, y2, -o.depth, o.d, N, p.x, { vface: 1, x: p.x, y: y2, op: o.id }));
+            } else p1.bores.push(vbore(1, p.x, p.y, -o.depth, o.d, N, p.x, { vface: 1, x: p.x, y: p.y, op: o.id }));
+          }
+        });
+      }
+      else if (o.kind === "edge") {
+        edgePts(o, P).forEach(function (p) {
+          var pt = edgePoint(p.edge, p.s, P);
+          if (p.edge === "L") p1.bores.push(vbore(CFG.face_left, p.t, p.s, -o.depth, o.d, "P", 0, { vface: 2, x: pt[0], y: pt[1], t: p.t, op: o.id }));
+          else if (p.edge === "R") p1.bores.push(vbore(CFG.face_right, p.t, p.s, -o.depth, o.d, "P", DX, { vface: 3, x: pt[0], y: pt[1], t: p.t, op: o.id }));
+          else if (CFG.drills_y_edges.indexOf(o.d) >= 0) {
+            p1.bores.push(vbore(p.edge === "F" ? CFG.face_front : CFG.face_back, p.s, p.t, -o.depth, o.d, "P", p.s,
+                                { vface: VFACE[p.edge], x: pt[0], y: pt[1], t: p.t, op: o.id }));
+          } else {
+            // rotated 90° CCW, same face up: front edge -> left end (F=3), back edge -> right end (F=2)
+            var Y = DX - p.s, left = p.edge === "F";
+            pr.bores.push(vbore(left ? CFG.face_left : CFG.face_right, p.t, Y, -o.depth, o.d, "P", left ? 0 : DY,
+                                { vface: left ? 2 : 3, x: left ? 0 : DY, y: Y, t: p.t, op: o.id }));
+          }
+        });
+      }
+    });
+
+    // routing: grooves first, then inner cut-outs, the outline (notches) last
+    P.ops.forEach(function (o) {
+      if (o.kind !== "groove") return;
+      var g = grooveBox(o, P);
+      if (o.face === "B") {                     // in the turned-over frame
+        if (g.dir === "X") { var c0 = DY - g.c1; g.c1 = DY - g.c0; g.c0 = c0; }
+        else { var a0 = DY - g.a1; g.a1 = DY - g.a0; g.a0 = a0; var t = g.open0; g.open0 = g.open1; g.open1 = t; }
+        p2.routes.push(groovePaths(g, o.depth));
+      } else p1.routes.push(groovePaths(g, o.depth));
+    });
+    P.ops.forEach(function (o) {
+      if (o.kind === "cut") p1.routes.push(cutPath(cutRect(o, P), P));
+      if (o.kind === "circle") p1.routes.push(circlePath(circleC(o, P), P));
+    });
+    P.ops.forEach(function (o) { if (o.kind === "notch") p1.routes.push(notchPath(notchRect(o, P), P)); });
+
+    function sortB(a) {
+      a.sort(function (p, q) {
+        return (Math.round(p.sortx * 1000) - Math.round(q.sortx * 1000)) ||
+               (Math.round(p.Y * 1000) - Math.round(q.Y * 1000)) || (Math.round(p.X * 1000) - Math.round(q.X * 1000));
+      });
+    }
+    sortB(p1.bores); sortB(p2.bores); sortB(pr.bores);
+
+    var base = cleanName(P.name) || "DETALE";
+    var progs = [];
+    var has1 = p1.bores.length + p1.routes.length > 0, has2 = p2.bores.length + p2.routes.length > 0;
+    if (has1) progs.push({ kind: "main", DX: DX, DY: DY, bores: p1.bores, routes: p1.routes, comment: [] });
+    if (has2) progs.push({ kind: has1 ? "flip" : "flipOnly", DX: DX, DY: DY, bores: p2.bores, routes: p2.routes, comment: [] });
+    if (pr.bores.length) progs.push({ kind: "rot", DX: DY, DY: DX, bores: pr.bores, routes: [], comment: [] });
+
+    progs.forEach(function (pg, k) {
+      pg.op = k + 1;
+      pg.name = base + "_" + pg.op + "OP";
+      if (pg.kind === "flip") pg.comment.push(pg.op + "OP: panel turned over about the X axis after 1OP (long edge stays in place, Y is mirrored)");
+      if (pg.kind === "flipOnly") pg.comment.push(pg.op + "OP: only the underside is machined - panel placed turned over about the X axis (Y is mirrored)");
+      if (pg.kind === "rot") pg.comment.push(pg.op + "OP: same face up as 1OP, panel ROTATED 90 deg COUNTER-CLOCKWISE (seen from above): the former front edge (Y=0) is now the left end (X=0), long side along Y");
+      pg.text = writeXXL(pg, P);
+      pg.view = viewDoc(pg, P);
+      pg.file = pg.name + ".XXL";
+    });
+    res.programs = progs;
+    return res;
+  }
+
+  /* ------------------------------------------------------ rotate the whole part 90° CCW
+     (x, y) -> (DY - y, x): left -> front, front -> right, right -> back, back -> left */
+  var RX = { L: "F", R: "B", C: "C" };          // old X reference -> new Y reference
+  var RY = { F: "R", B: "L", C: "C" };          // old Y reference -> new X reference
+  var REDGE = { L: "F", F: "R", R: "B", B: "L" };
+  var RCORNER = { FL: "FR", FR: "BR", BR: "BL", BL: "FL" };
+  function rotate(part) {
+    var P = JSON.parse(JSON.stringify(part)), DX = P.DX, DY = P.DY;
+    P.DX = DY; P.DY = DX;
+    P.ops = P.ops.map(function (o) {
+      var n = JSON.parse(JSON.stringify(o)), t;
+      if (o.kind === "hole") {
+        n.x = o.y; n.xr = RY[o.yr]; n.y = o.x; n.yr = RX[o.xr];
+        n.dir = o.dir === "X" ? "Y" : "X"; n.mx = o.my; n.my = o.mx;
+      } else if (o.kind === "edge") {
+        n.edge = REDGE[o.edge];
+        n.sr = (o.edge === "L" || o.edge === "R") ? RY[o.sr] : RX[o.sr];
+      } else if (o.kind === "groove") {
+        n.dir = o.dir === "X" ? "Y" : "X";
+        n.pr = o.dir === "X" ? RY[o.pr] : RX[o.pr];
+        n.ar = o.dir === "X" ? RX[o.ar] : RY[o.ar];
+      } else if (o.kind === "notch") {
+        n.corner = RCORNER[o.corner]; t = n.a; n.a = n.b; n.b = t;
+      } else if (o.kind === "cut" || o.kind === "circle") {
+        n.x = o.y; n.xr = RY[o.yr]; n.y = o.x; n.yr = RX[o.xr];
+        if (o.kind === "cut") { t = n.w; n.w = n.h; n.h = t; }
+      }
+      return n;
+    });
+    return P;
+  }
+
+  return {
+    CFG: CFG, R: R, LEAD: LEAD, DEPTH: DEPTH, num: num, r1: r1,
+    blank: blank, make: make, check: check, build: build, rotate: rotate, cleanName: cleanName,
+    abs: abs, rel: rel, holePts: holePts, edgePts: edgePts, edgePoint: edgePoint, edgeLen: edgeLen, edgeH: edgeH,
+    grooveBox: grooveBox, grooveRect: grooveRect, cutRect: cutRect, notchRect: notchRect, circleC: circleC,
+    writeXXL: writeXXL
+  };
+})();
+</script>
+<script id="part-ui">
+/* ============================================================================
+   Part builder UI — "Nauja detalė".
+   One screen: panel size on the left, operation tiles, a live drawing in the
+   middle (drag to move, dimensions from the edges you measured from), the
+   selected operation's settings on the right, and the finished programs with
+   operator instructions along the bottom.
+============================================================================ */
+var PB = (function () {
+  "use strict";
+  var KEY_DRAFT = "xxlfix.builder.draft.v1", KEY_LIB = "xxlfix.builder.lib.v1";
+  var R = PART.R;
+  var part = PART.blank(), selId = null, built = null;
+  var hist = [], fut = [], last = null, commitT = null, loaded = false;
+  var showPath = false, view = null, drag = null;
+  var el = {};
+  var C = { top: "#1f6feb", bot: "#7b1fa2", edge: "#d98200", rot: "#b26a00", rout: "#147a45", routFill: "#9fd3b6",
+            sel: "#7b1fa2", err: "#c62828", panel: "#fbfcfe", line: "#3f4956", bg: "#e8edf3", grid: "#e6ebf1", lbl: "#5f6b7c" };
+
+  function $(id) { return document.getElementById(id); }
+  function escH(s) { return String(s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
+  function fin(v) { return typeof v === "number" && isFinite(v); }
+  function n(v) { return fin(v) ? PART.num(Math.round(v * 1000) / 1000) : "?"; }
+  function plural(k, one, few, many) {
+    var a = k % 10, b = k % 100;
+    return k + " " + (a === 1 && b !== 11 ? one : a >= 2 && a <= 9 && (b < 11 || b > 19) ? few : many);
+  }
+  function selOp() { for (var i = 0; i < part.ops.length; i++) if (part.ops[i].id === selId) return part.ops[i]; return null; }
+  function store(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) { /* storage off */ } }
+  function load(k) { try { var s = localStorage.getItem(k); return s ? JSON.parse(s) : null; } catch (e) { return null; } }
+
+  /* ---------------------------------------------------------------- icons */
+  var IC = {
+    hole: '<rect x="3" y="7" width="26" height="18" rx="1.5"/><circle cx="11" cy="16" r="3.4" fill="currentColor"/><circle cx="21" cy="16" r="2" fill="currentColor"/>',
+    shelf: '<rect x="3" y="7" width="26" height="18" rx="1.5"/>' + [8, 13, 18, 23].map(function (x) {
+             return '<circle cx="' + x + '" cy="11.5" r="1.4" fill="currentColor"/><circle cx="' + x + '" cy="20.5" r="1.4" fill="currentColor"/>'; }).join(""),
+    hinge: '<rect x="3" y="7" width="26" height="18" rx="1.5"/><circle cx="9" cy="12.5" r="3.6"/><circle cx="23" cy="12.5" r="3.6"/>',
+    edge: '<rect x="5" y="7" width="24" height="18" rx="1.5"/><path d="M5 16h8" stroke-dasharray="2 1.6" stroke-width="3"/><circle cx="5" cy="16" r="2.2" fill="currentColor"/>',
+    groove: '<rect x="3" y="7" width="26" height="18" rx="1.5"/><rect x="3" y="11" width="26" height="4.5" fill="currentColor" stroke="none" opacity=".55"/>',
+    notch: '<path d="M3 7h19v7h7v11H3z"/>',
+    cut: '<rect x="3" y="7" width="26" height="18" rx="1.5"/><rect x="10" y="11.5" width="12" height="9" rx="2.2" stroke-dasharray="2.5 1.5"/>',
+    circle: '<rect x="3" y="7" width="26" height="18" rx="1.5"/><circle cx="16" cy="16" r="5" stroke-dasharray="2.5 1.5"/>'
+  };
+  var ICOL = { hole: C.top, shelf: C.top, hinge: C.top, edge: C.edge, groove: C.rout, notch: C.rout, cut: C.rout, circle: C.rout };
+  function icon(k, col) {
+    return '<svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.6" style="color:' + (col || ICOL[k]) + '">' + IC[k] + '</svg>';
+  }
+  function kindOf(o) { return o.kind === "hole" && o.preset && presetOk(o) ? o.preset : o.kind; }
+  function presetOk(o) { return (o.preset === "shelf" && o.d === 5) || (o.preset === "hinge" && o.d === 35); }
+
+  var TILES = [
+    ["hole", "Skylė", "Ø5 · 8 · 15 · 35"], ["shelf", "Lentynų skylės", "Ø5 eilės kas 32"],
+    ["hinge", "Vyrių lizdai", "Ø35 × 13"], ["edge", "Briaunos skylė", "Ø5 · Ø8 šone"],
+    ["groove", "Griovelis", "freza Ø15.5"], ["notch", "Kampo išpjova", "kiaurai"],
+    ["cut", "Išpjova viduje", "stačiakampė"], ["circle", "Apvali kiaurymė", "nuo Ø20"]
+  ];
+
+  /* ---------------------------------------------------------------- words */
+  var REF = { L: "nuo kairės", R: "nuo dešinės", F: "nuo priekio", B: "nuo galo", C: "centre" };
+  var EDGE = { L: "kairė", R: "dešinė", F: "priekis", B: "galas" };
+  var CORNER = { FL: "priekis-kairė", FR: "priekis-dešinė", BL: "galas-kairė", BR: "galas-dešinė" };
+  function pos(v, r) { return r === "C" ? "centre" : n(v) + " " + REF[r]; }
+
+  function title(o) {
+    switch (o.kind) {
+      case "hole":
+        var nm = o.preset === "shelf" && presetOk(o) ? "Lentynų skylės" : o.preset === "hinge" && presetOk(o) ? "Vyrių lizdai" : "Skylė";
+        return nm + " Ø" + n(o.d) + (o.through ? " kiaurai" : " × " + n(o.depth));
+      case "edge": return "Briaunos skylė Ø" + n(o.d) + " × " + n(o.depth);
+      case "groove": return "Griovelis " + n(o.w) + " × " + n(o.depth);
+      case "notch": return "Kampo išpjova " + n(o.a) + " × " + n(o.b);
+      case "cut": return "Išpjova " + n(o.w) + " × " + n(o.h);
+      case "circle": return "Kiaurymė Ø" + n(o.D);
+    }
+    return o.kind;
+  }
+  function subline(o) {
+    var s = [];
+    switch (o.kind) {
+      case "hole":
+        s.push(pos(o.x, o.xr), pos(o.y, o.yr));
+        if (o.n > 1) s.push("×" + o.n + " kas " + n(o.step));
+        if (o.mx || o.my) s.push("+ veidr.");
+        if (o.face === "B" && !o.through) s.push("apačioje");
+        break;
+      case "edge":
+        s.push(EDGE[o.edge] + (o.both ? " + " + EDGE[{ L: "R", R: "L", F: "B", B: "F" }[o.edge]] : ""), pos(o.s, o.sr));
+        if (o.n > 1) s.push("×" + o.n + " kas " + n(o.step));
+        break;
+      case "groove":
+        s.push("išilgai " + o.dir, o.pr === "C" ? "centre" : n(o.p) + " " + REF[o.pr], o.full ? "per visą" : n(o.len) + " ilgio");
+        if (o.face === "B") s.push("apačioje");
+        break;
+      case "notch": s.push(CORNER[o.corner]); break;
+      case "cut": case "circle": s.push(pos(o.x, o.xr), pos(o.y, o.yr)); break;
+    }
+    return s.join(" · ");
+  }
+
+  /* which program an operation lands in */
+  function opKind(o) {
+    if (o.kind === "hole") return !o.through && o.face === "B" ? "flip" : "main";
+    if (o.kind === "groove") return o.face === "B" ? "flip" : "main";
+    if (o.kind === "edge" && (o.edge === "F" || o.edge === "B") && PART.CFG.drills_y_edges.indexOf(o.d) < 0) return "rot";
+    return "main";
+  }
+  function progNums() {
+    var has = { main: 0, flip: 0, rot: 0 };
+    part.ops.forEach(function (o) { has[opKind(o)] = 1; });
+    var m = {}, k = 1;
+    if (has.main) m.main = k++;
+    if (has.flip) m.flip = k++;
+    if (has.rot) m.rot = k++;
+    return m;
+  }
+
+  /* ---------------------------------------------------------------- history */
+  function snap() { return JSON.stringify(part); }
+  function commit() {
+    clearTimeout(commitT); commitT = null;
+    var s = snap();
+    if (s === last) return;
+    if (last !== null) { hist.push(last); if (hist.length > 200) hist.shift(); }
+    fut = []; last = s; saveDraft(); undoBtns();
+  }
+  function later() { clearTimeout(commitT); commitT = setTimeout(commit, 700); }
+  function undo() {
+    commit();
+    if (!hist.length) return;
+    fut.push(last); last = hist.pop(); part = JSON.parse(last); afterJump();
+  }
+  function redo() {
+    commit();
+    if (!fut.length) return;
+    hist.push(last); last = fut.pop(); part = JSON.parse(last); afterJump();
+  }
+  function afterJump() { if (!selOp()) selId = null; saveDraft(); undoBtns(); render(); }
+  function undoBtns() { el.undo.disabled = !hist.length; el.redo.disabled = !fut.length; }
+  function saveDraft() { store(KEY_DRAFT, { part: part, sel: selId }); }
+
+  /* ---------------------------------------------------------------- forms */
+  function fmtIn(v) { return fin(v) ? String(Math.round(v * 1000) / 1000) : ""; }
+  function parseIn(s) {
+    s = String(s).replace(/\s/g, "").replace(",", ".");
+    if (!/^-?(\d+\.?\d*|\.\d+)$/.test(s)) return NaN;
+    return parseFloat(s);
+  }
+  function numF(label, tgt, obj, key, o) {
+    o = o || {};
+    return '<div class="pb-f">' + (label ? '<span class="l">' + label + '</span>' : '') +
+      '<span class="pb-num' + (o.dis ? " dis" : "") + '" data-tgt="' + tgt + '" data-k="' + key + '"' + (o.int ? ' data-int="1"' : '') + '>' +
+      '<button type="button" tabindex="-1" data-step="-' + (o.step || 1) + '" aria-label="mažiau">−</button>' +
+      '<input type="text" inputmode="decimal" autocomplete="off" value="' + fmtIn(o.show !== undefined ? o.show : obj[key]) + '"' + (o.dis ? " disabled" : "") + '>' +
+      '<button type="button" tabindex="-1" data-step="' + (o.step || 1) + '" aria-label="daugiau">+</button></span>' +
+      '<span class="pb-u">' + (o.unit === undefined ? "mm" : o.unit) + '</span></div>';
+  }
+  function seg(label, key, opts, cur, o) {
+    o = o || {};
+    return '<div class="pb-f">' + (label ? '<span class="l' + (o.wide ? " w" : "") + '">' + label + '</span>' : '') +
+      '<span class="pb-seg' + (o.big ? " big" : "") + '">' + opts.map(function (p) {
+        return '<button type="button" data-set="' + key + '" data-v=\'' + JSON.stringify(p[0]) + '\'' +
+          (p[2] ? " disabled" : "") + (cur === p[0] ? ' class="on"' : '') + '>' + p[1] + '</button>';
+      }).join("") + '</span></div>';
+  }
+  function chk(label, key, on, dis) {
+    return '<label class="pb-chk"' + (dis ? ' style="opacity:.45"' : '') + '><input type="checkbox" data-chk="' + key + '"' +
+      (on ? " checked" : "") + (dis ? " disabled" : "") + '> ' + label + '</label>';
+  }
+  function refSeg(label, key, axis, cur) {
+    var o = axis === "X" ? [["L", "nuo kairės"], ["C", "centre"], ["R", "nuo dešinės"]]
+                         : [["F", "nuo priekio"], ["C", "centre"], ["B", "nuo galo"]];
+    return seg(label, key, o, cur, { wide: true });
+  }
+
+  /* ---------------------------------------------------------------- panel form */
+  function renderPanel() {
+    var h = numF("Ilgis X", "part", part, "DX", { step: 1 }) +
+            numF("Plotis Y", "part", part, "DY", { step: 1 }) +
+            '<div class="pb-f"><span class="l">Storis</span><span class="pb-seg big">' +
+            [16, 18, 19, 22, 25].map(function (t) {
+              return '<button type="button" data-pset="DZ" data-v="' + t + '"' + (part.DZ === t ? ' class="on"' : '') + '>' + t + '</button>';
+            }).join("") + '</span></div>' +
+            numF("", "part", part, "DZ", { step: 1 }) +
+            '<div class="pb-f" style="margin:2px 0 0"><button type="button" class="ghost" id="pbRot" style="padding:5px 10px;font-size:12.5px">⟳ Pasukti detalę 90°</button></div>' +
+            '<div class="pb-msgs" id="pbPanelMsg"></div>';
+    el.panel.innerHTML = h;
+    $("pbRot").addEventListener("click", function () {
+      part = PART.rotate(part); commit(); render();
+      toast("Detalė pasukta 90° — operacijos liko savo vietose ant plokštės.");
+    });
+    panelMsgs();
+  }
+  function panelMsgs() {
+    var m = (built && built.check.panel) || [];
+    var box = $("pbPanelMsg"); if (!box) return;
+    box.innerHTML = m.filter(function (x) { return x.level !== "info" || !part.ops.length; })
+      .map(function (x) { return '<div class="pb-msg ' + x.level + '">' + escH(x.msg) + '</div>'; }).join("");
+  }
+
+  /* ---------------------------------------------------------------- operation form */
+  function renderProps() {
+    var o = selOp();
+    if (!o) {
+      el.right.innerHTML = '<div class="pb-hint"><b>Kaip sukurti detalę</b><ul>' +
+        '<li>Įveskite plokštės <b>ilgį, plotį ir storį</b>.</li>' +
+        '<li>Kairėje paspauskite operaciją — ji atsiras brėžinyje.</li>' +
+        '<li>Čia nustatykite <b>atstumą nuo tos briaunos, nuo kurios matavote</b> — pakeitus plokštės dydį, skylė liks toje pačioje vietoje nuo tos briaunos.</li>' +
+        '<li>Operaciją galima <b>vilkti</b> brėžinyje pele arba pirštu.</li>' +
+        '<li>Apačioje — gatavos programos ir ką daryti su plokšte. Spauskite <b>Atsisiųsti</b> arba <b>Įrašyti į stakles</b>.</li>' +
+        '</ul><p style="margin-top:12px">0 taškas — <b>priekis-kairė</b> (apatinis kairys kampas brėžinyje), kaip staklėse.</p></div>';
+      return;
+    }
+    var P = part, nums = progNums(), pk = opKind(o), h = "";
+    h += '<div class="pb-ph">' + icon(kindOf(o), C.sel) + '<div class="t">' + escH(title(o)) +
+         '<small>' + (nums[pk] ? nums[pk] + "OP" : "") + (pk === "flip" ? " · apverstai" : pk === "rot" ? " · pasukus 90°" : "") + '</small></div>' +
+         '<button type="button" class="ghost" data-act="dup" title="Kopijuoti (Ctrl+D)">Kopijuoti</button>' +
+         '<button type="button" class="del" data-act="del" title="Ištrinti (Delete)">Ištrinti</button></div>';
+    h += '<div class="pb-props">';
+    if (o.kind === "hole") {
+      h += seg("Pusė", "face", [["T", "Viršus"], ["B", "Apačia", o.through]], o.through ? "T" : o.face);
+      h += seg("Skersmuo", "d", PART.CFG.drills_top.map(function (d) { return [d, "Ø" + d]; }), o.d, { big: true });
+      h += numF("Gylis", "op", o, "depth", { dis: o.through });
+      h += '<div class="pb-f"><span class="l"></span>' + chk("Kiaurai", "through", o.through, PART.CFG.drills_through.indexOf(o.d) < 0) + '</div>';
+      h += '<div class="grp">' + refSeg("Vieta išilgai X", "xr", "X", o.xr) + numF("", "op", o, "x", { dis: o.xr === "C", show: o.xr === "C" ? P.DX / 2 : undefined }) +
+           refSeg("Vieta išilgai Y", "yr", "Y", o.yr) + numF("", "op", o, "y", { dis: o.yr === "C", show: o.yr === "C" ? P.DY / 2 : undefined }) + '</div>';
+      h += '<div class="grp">' + numF("Kiekis", "op", o, "n", { int: 1, unit: "vnt." }) +
+           numF("Žingsnis", "op", o, "step") +
+           seg("Kryptis", "dir", [["X", "išilgai X →"], ["Y", "išilgai Y ↑"]], o.dir) + '</div>';
+      h += '<div class="grp"><div class="pb-f"><span class="l w">Veidrodinė kopija</span></div>' +
+           chk("ir kitame gale (kairė ↔ dešinė)", "mx", o.mx) + chk("ir kitoje pusėje (priekis ↔ galas)", "my", o.my) + '</div>';
+    }
+    else if (o.kind === "edge") {
+      h += '<div class="pb-f"><span class="l w">Briauna</span></div><div class="pb-picker" style="margin-bottom:9px">' +
+           '<span></span>' + pick("edge", "B", "Galas", o.edge) + '<span></span>' +
+           pick("edge", "L", "Kairė", o.edge) + '<div class="pv">' + n(P.DX) + '×' + n(P.DY) + '</div>' + pick("edge", "R", "Dešinė", o.edge) +
+           '<span></span>' + pick("edge", "F", "Priekis", o.edge) + '<span></span></div>';
+      h += seg("Skersmuo", "d", PART.CFG.drills_x_ends.map(function (d) { return [d, "Ø" + d]; }), o.d, { big: true });
+      h += numF("Gylis", "op", o, "depth");
+      var along = o.edge === "L" || o.edge === "R" ? "Y" : "X";
+      h += '<div class="grp">' + refSeg("Vieta briaunoje", "sr", along, o.sr) + numF("", "op", o, "s", { dis: o.sr === "C", show: o.sr === "C" ? PART.edgeLen(o.edge, P) / 2 : undefined }) + '</div>';
+      h += '<div class="grp"><div class="pb-f"><span class="l w">Aukštis nuo apačios</span></div>' +
+           chk("storio viduryje (" + n(P.DZ / 2) + ")", "hc", o.hc) + numF("", "op", o, "h", { dis: o.hc, show: o.hc ? P.DZ / 2 : undefined }) + '</div>';
+      h += '<div class="grp">' + numF("Kiekis", "op", o, "n", { int: 1, unit: "vnt." }) +
+           numF("Žingsnis", "op", o, "step") +
+           chk("ir priešingoje briaunoje (" + EDGE[{ L: "R", R: "L", F: "B", B: "F" }[o.edge]] + ")", "both", o.both) + '</div>';
+    }
+    else if (o.kind === "groove") {
+      h += seg("Pusė", "face", [["T", "Viršus"], ["B", "Apačia"]], o.face);
+      h += seg("Kryptis", "dir", [["X", "išilgai X →"], ["Y", "išilgai Y ↑"]], o.dir);
+      h += numF("Plotis", "op", o, "w") + numF("Gylis", "op", o, "depth");
+      h += '<div class="grp">' + refSeg("Atstumas iki griovelio krašto", "pr", o.dir === "X" ? "Y" : "X", o.pr) +
+           numF("", "op", o, "p", { dis: o.pr === "C", show: o.pr === "C" ? ((o.dir === "X" ? P.DY : P.DX) - o.w) / 2 : undefined }) + '</div>';
+      h += '<div class="grp">' + seg("Ilgis", "full", [[true, "Per visą plokštę"], [false, "Dalinis"]], o.full);
+      if (!o.full) h += refSeg("Pradžia", "ar", o.dir, o.ar) + numF("", "op", o, "a", { dis: o.ar === "C" }) + numF("Ilgis", "op", o, "len");
+      h += '</div>';
+    }
+    else if (o.kind === "notch") {
+      h += '<div class="pb-f"><span class="l w">Kampas</span></div><div class="pb-picker" style="grid-template-columns:auto auto;margin-bottom:9px">' +
+           pick("corner", "BL", "↖ galas-kairė", o.corner) + pick("corner", "BR", "galas-dešinė ↗", o.corner) +
+           pick("corner", "FL", "↙ priekis-kairė", o.corner) + pick("corner", "FR", "priekis-dešinė ↘", o.corner) + '</div>';
+      h += numF("Išilgai X", "op", o, "a") + numF("Išilgai Y", "op", o, "b");
+    }
+    else if (o.kind === "cut") {
+      h += numF("Plotis X", "op", o, "w") + numF("Aukštis Y", "op", o, "h");
+      h += '<div class="grp">' + refSeg("Iki išpjovos krašto X", "xr", "X", o.xr) + numF("", "op", o, "x", { dis: o.xr === "C", show: o.xr === "C" ? (P.DX - o.w) / 2 : undefined }) +
+           refSeg("Iki išpjovos krašto Y", "yr", "Y", o.yr) + numF("", "op", o, "y", { dis: o.yr === "C", show: o.yr === "C" ? (P.DY - o.h) / 2 : undefined }) + '</div>';
+    }
+    else if (o.kind === "circle") {
+      h += numF("Skersmuo", "op", o, "D");
+      h += '<div class="grp">' + refSeg("Centras išilgai X", "xr", "X", o.xr) + numF("", "op", o, "x", { dis: o.xr === "C", show: o.xr === "C" ? P.DX / 2 : undefined }) +
+           refSeg("Centras išilgai Y", "yr", "Y", o.yr) + numF("", "op", o, "y", { dis: o.yr === "C", show: o.yr === "C" ? P.DY / 2 : undefined }) + '</div>';
+    }
+    h += '<div class="pb-msgs" id="pbMsgs"></div></div>';
+    el.right.innerHTML = h;
+    opMsgs();
+  }
+  function pick(key, v, label, cur) {
+    return '<button type="button" data-set="' + key + '" data-v=\'"' + v + '"\'' + (cur === v ? ' class="on"' : '') + '>' + label + '</button>';
+  }
+  function opMsgs() {
+    var box = $("pbMsgs"), o = selOp(); if (!box || !o) return;
+    var m = (built && built.check.ops[o.id]) || [];
+    var ord = { err: 0, warn: 1, info: 2 };
+    box.innerHTML = m.slice().sort(function (a, b) { return ord[a.level] - ord[b.level]; })
+      .map(function (x) { return '<div class="pb-msg ' + x.level + '">' + escH(x.msg) + '</div>'; }).join("");
+  }
+
+  /* change a reference edge without moving the feature */
+  function setRef(o, key, nr) {
+    var P = part, g, c, L;
+    if (o.kind === "hole" || o.kind === "circle") {
+      var vk = key === "xr" ? "x" : "y"; L = key === "xr" ? P.DX : P.DY;
+      c = PART.abs(o[vk], o[key], L); o[key] = nr; o[vk] = PART.r1(PART.rel(c, nr, L));
+    } else if (o.kind === "cut") {
+      g = PART.cutRect(o, P);
+      if (key === "xr") { o.xr = nr; o.x = PART.r1(nr === "L" ? g.x0 : nr === "R" ? P.DX - g.x1 : 0); }
+      else { o.yr = nr; o.y = PART.r1(nr === "F" ? g.y0 : nr === "B" ? P.DY - g.y1 : 0); }
+    } else if (o.kind === "edge") {
+      L = PART.edgeLen(o.edge, P); c = PART.abs(o.s, o.sr, L); o.sr = nr; o.s = PART.r1(PART.rel(c, nr, L));
+    } else if (o.kind === "groove") {
+      g = PART.grooveBox(o, P);
+      if (key === "pr") { o.pr = nr; o.p = PART.r1(nr === "F" || nr === "L" ? g.c0 : nr === "C" ? 0 : g.across - g.c1); }
+      else { o.ar = nr; o.a = PART.r1(nr === "L" || nr === "F" ? g.a0 : nr === "C" ? 0 : g.along - g.a1); }
+    }
+  }
+  var FAM = { F: "L", B: "R", L: "F", R: "B", C: "C" };
+
+  function setOpt(o, key, v) {
+    var D = PART.DEPTH;
+    if (/^(xr|yr|sr|pr|ar)$/.test(key)) { setRef(o, key, v); return; }
+    if (key === "d") {
+      var tbl = o.kind === "edge" ? D.edge : D.top;
+      if (o.depth === tbl[o.d] || !fin(o.depth)) o.depth = tbl[v] || o.depth;
+      o.d = v;
+      if (o.kind === "hole" && o.through && PART.CFG.drills_through.indexOf(v) < 0) o.through = false;
+      return;
+    }
+    if (key === "edge") {
+      var wasLR = o.edge === "L" || o.edge === "R", isLR = v === "L" || v === "R";
+      if (wasLR !== isLR) { o.sr = FAM[o.sr]; }
+      o.edge = v; return;
+    }
+    if (key === "dir" && o.kind === "groove" && o.dir !== v) { o.pr = FAM[o.pr]; o.ar = FAM[o.ar]; }
+    if (key === "dir" && o.kind === "hole" && o.dir !== v) { o.dir = v; return; }
+    if (key === "full" && v === false && o.kind === "groove") {
+      var g = PART.grooveBox(o, part);
+      o.ar = o.dir === "X" ? "L" : "F"; o.a = 0; o.len = PART.r1(Math.max(50, g.along / 2));
+    }
+    o[key] = v;
+  }
+
+  /* ---------------------------------------------------------------- list */
+  function renderList() {
+    var nums = progNums(), chkd = built ? built.check.ops : {};
+    el.count.textContent = part.ops.length ? part.ops.length : "";
+    if (!part.ops.length) {
+      el.ops.innerHTML = '<div class="pb-empty">Kol kas operacijų nėra. Paspauskite operaciją viršuje.</div>';
+      return;
+    }
+    el.ops.innerHTML = part.ops.map(function (o) {
+      var m = chkd[o.id] || [], lv = m.some(function (x) { return x.level === "err"; }) ? "err" : m.some(function (x) { return x.level === "warn"; }) ? "warn" : "";
+      var pk = opKind(o), num = nums[pk];
+      return '<div class="pb-op' + (o.id === selId ? " sel" : "") + '" data-id="' + o.id + '">' +
+        (lv ? '<span class="dot ' + lv + '"></span>' : '') + icon(kindOf(o)) +
+        '<div><div class="t">' + escH(title(o)) + '</div><div class="s">' + escH(subline(o)) + '</div></div>' +
+        '<span class="tg' + (pk === "flip" ? " op2" : pk === "rot" ? " op3" : "") + '">' + (num ? num + "OP" : "") + '</span></div>';
+    }).join("");
+  }
+
+  /* ---------------------------------------------------------------- drawing */
+  function roundPoly(x0, y0, x1, y1, rr) {     // rect with selected corners rounded: rr = {ll, lr, ur, ul} radii
+    var pts = [], seg = 6;
+    function arc(cx, cy, r, a0) {
+      for (var k = 0; k <= seg; k++) { var a = a0 + Math.PI / 2 * k / seg; pts.push([cx + r * Math.cos(a), cy + r * Math.sin(a)]); }
+    }
+    if (rr.ll) arc(x0 + rr.ll, y0 + rr.ll, rr.ll, Math.PI); else pts.push([x0, y0]);
+    if (rr.lr) arc(x1 - rr.lr, y0 + rr.lr, rr.lr, -Math.PI / 2); else pts.push([x1, y0]);
+    if (rr.ur) arc(x1 - rr.ur, y1 - rr.ur, rr.ur, 0); else pts.push([x1, y1]);
+    if (rr.ul) arc(x0 + rr.ul, y1 - rr.ul, rr.ul, Math.PI / 2); else pts.push([x0, y1]);
+    return pts;
+  }
+
+  function renderSvg() {
+    var W = el.stage.clientWidth, H = el.stage.clientHeight, P = part;
+    if (!W || !H) return;
+    el.svg.setAttribute("viewBox", "0 0 " + W + " " + H);
+    if (!(fin(P.DX) && fin(P.DY) && P.DX > 0 && P.DY > 0)) { el.svg.innerHTML = ""; view = null; return; }
+    var ml = 62, mr = 84, mt = 64, mb = 62;
+    var s = Math.min((W - ml - mr) / P.DX, (H - mt - mb) / P.DY);
+    var ox = ml + ((W - ml - mr) - P.DX * s) / 2, oy = mt + ((H - mt - mb) - P.DY * s) / 2 + P.DY * s;
+    view = { s: s, ox: ox, oy: oy };
+    function X(x) { return +(ox + x * s).toFixed(2); }
+    function Y(y) { return +(oy - y * s).toFixed(2); }
+    function poly(pts) { return pts.map(function (p) { return X(p[0]) + "," + Y(p[1]); }).join(" "); }
+    function txt(x, y, t, o) {
+      o = o || {};
+      return '<text x="' + x + '" y="' + y + '" font-size="' + (o.fs || 12) + '" fill="' + (o.c || C.lbl) + '" text-anchor="' + (o.a || "middle") + '"' +
+        (o.rot ? ' transform="rotate(' + o.rot + ' ' + x + ' ' + y + ')"' : '') + (o.b ? ' font-weight="700"' : '') +
+        ' stroke="' + (o.halo || "#fff") + '" stroke-width="' + (o.halo === "none" ? 0 : 3.5) + '" paint-order="stroke" dominant-baseline="middle">' + escH(t) + '</text>';
+    }
+    var out = [], sel = selOp(), nums = progNums(), bad = {};
+    if (built) Object.keys(built.check.ops).forEach(function (id) {
+      if (built.check.ops[id].some(function (x) { return x.level === "err"; })) bad[id] = 1;
+    });
+
+    out.push('<defs><clipPath id="pbClip"><rect x="' + X(0) + '" y="' + Y(P.DY) + '" width="' + (P.DX * s).toFixed(2) + '" height="' + (P.DY * s).toFixed(2) + '"/></clipPath>' +
+             '<marker id="pbA" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 1L10 5L0 9z" fill="' + C.sel + '"/></marker>' +
+             '<marker id="pbAg" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 1L10 5L0 9z" fill="#7d8896"/></marker></defs>');
+    // panel + 100 mm grid
+    out.push('<rect x="' + X(0) + '" y="' + Y(P.DY) + '" width="' + (P.DX * s).toFixed(2) + '" height="' + (P.DY * s).toFixed(2) + '" fill="' + C.panel + '"/>');
+    var gstep = s * 100 < 22 ? 500 : 100, g = [];
+    for (var gx = gstep; gx < P.DX; gx += gstep) g.push('M' + X(gx) + ' ' + Y(0) + 'V' + Y(P.DY));
+    for (var gy = gstep; gy < P.DY; gy += gstep) g.push('M' + X(0) + ' ' + Y(gy) + 'H' + X(P.DX));
+    if (g.length) out.push('<path d="' + g.join("") + '" stroke="' + C.grid + '" stroke-width="1" fill="none"/>');
+    var underAt = out.length;      // edge names and overall sizes go here, under the operations
+
+    function isSel(o) { return sel && o.id === sel.id; }
+    function grp(o, k, sx, sy, inner) {
+      return '<g class="op" data-id="' + o.id + '" data-k="' + k + '" data-sx="' + sx + '" data-sy="' + sy + '">' + inner + '</g>';
+    }
+
+    // removed material and grooves (clipped to the panel)
+    var cut = [];
+    part.ops.forEach(function (o) {
+      var on = isSel(o), stroke = on ? C.sel : bad[o.id] ? C.err : C.line, sw = on || bad[o.id] ? 2.5 : 1.3;
+      if (o.kind === "notch" && fin(o.a) && fin(o.b) && o.a > 0 && o.b > 0) {
+        var nr = PART.notchRect(o, P), rr = Math.min(R, o.a, o.b), L = o.corner[1] === "L", F = o.corner[0] === "F";
+        var pts = roundPoly(nr.x0, nr.y0, nr.x1, nr.y1, { ll: (!L && !F) ? rr : 0, lr: (L && !F) ? rr : 0, ur: (L && F) ? rr : 0, ul: (!L && F) ? rr : 0 });
+        cut.push(grp(o, 0, 1, 1, '<polygon points="' + poly(pts) + '" fill="' + C.bg + '" stroke="' + stroke + '" stroke-width="' + sw + '"/>'));
+      }
+      if (o.kind === "cut" && fin(o.w) && fin(o.h) && o.w > 0 && o.h > 0) {
+        var cr = PART.cutRect(o, P), r2 = Math.min(R, o.w / 2, o.h / 2);
+        cut.push(grp(o, 0, 1, 1, '<polygon points="' + poly(roundPoly(cr.x0, cr.y0, cr.x1, cr.y1, { ll: r2, lr: r2, ur: r2, ul: r2 })) +
+                '" fill="' + C.bg + '" stroke="' + stroke + '" stroke-width="' + sw + '"/>'));
+      }
+      if (o.kind === "circle" && fin(o.D) && o.D > 0) {
+        var cc = PART.circleC(o, P);
+        cut.push(grp(o, 0, 1, 1, '<circle cx="' + X(cc.x) + '" cy="' + Y(cc.y) + '" r="' + (o.D / 2 * s).toFixed(2) + '" fill="' + C.bg + '" stroke="' + stroke + '" stroke-width="' + sw + '"/>'));
+      }
+      if (o.kind === "groove" && fin(o.w) && o.w > 0 && fin(o.p)) {
+        var gb = PART.grooveBox(o, P), rc = PART.grooveRect(gb), rg = Math.min(R, o.w / 2);
+        var r0 = gb.open0 ? 0 : rg, r1_ = gb.open1 ? 0 : rg;
+        var rr2 = gb.dir === "X" ? { ll: r0, ul: r0, lr: r1_, ur: r1_ } : { ll: r0, lr: r0, ul: r1_, ur: r1_ };
+        var bot = o.face === "B";
+        cut.push(grp(o, 0, 1, 1, '<polygon points="' + poly(roundPoly(rc.x0, rc.y0, rc.x1, rc.y1, rr2)) + '" fill="' + (bot ? "rgba(123,31,162,.07)" : C.routFill) +
+                '" fill-opacity="' + (bot ? 1 : 0.55) + '" stroke="' + (on ? C.sel : bad[o.id] ? C.err : bot ? C.bot : C.rout) + '" stroke-width="' + (on || bad[o.id] ? 2.5 : 1.3) + '"' + (bot ? ' stroke-dasharray="6 4"' : '') + '/>'));
+      }
+    });
+    out.push('<g clip-path="url(#pbClip)">' + cut.join("") + '</g>');
+    out.push('<rect x="' + X(0) + '" y="' + Y(P.DY) + '" width="' + (P.DX * s).toFixed(2) + '" height="' + (P.DY * s).toFixed(2) + '" fill="none" stroke="' + C.line + '" stroke-width="1.6" pointer-events="none"/>');
+
+    // tool paths
+    if (showPath && built && built.programs) {
+      var tp = [];
+      built.programs.forEach(function (pg) {
+        if (pg.kind === "rot") return;
+        var flip = pg.kind === "flip" || pg.kind === "flipOnly";
+        pg.routes.forEach(function (rt) {
+          var pts = [], prev = null;
+          rt.moves.forEach(function (m) {
+            if (m.t === "A" && prev) {
+              var r = Math.hypot(prev[0] - m.i, prev[1] - m.j), a0 = Math.atan2(prev[1] - m.j, prev[0] - m.i), a1 = Math.atan2(m.y - m.j, m.x - m.i), d = a1 - a0;
+              if (m.g === 3) { while (d <= 1e-9) d += 2 * Math.PI; } else { while (d >= -1e-9) d -= 2 * Math.PI; }
+              for (var k = 1; k <= 12; k++) pts.push([m.i + r * Math.cos(a0 + d * k / 12), m.j + r * Math.sin(a0 + d * k / 12)]);
+            } else pts.push([m.x, m.y]);
+            prev = [m.x, m.y];
+          });
+          if (flip) pts = pts.map(function (p) { return [p[0], P.DY - p[1]]; });
+          var pl = poly(pts);
+          tp.push('<polyline points="' + pl + '" fill="none" stroke="' + C.rout + '" stroke-opacity=".16" stroke-width="' + (PART.CFG.rout.dia * s).toFixed(1) + '" stroke-linejoin="round" stroke-linecap="round"/>' +
+                  '<polyline points="' + pl + '" fill="none" stroke="' + C.rout + '" stroke-width="1.4" stroke-dasharray="' + (flip ? "5 3" : "none") + '"/>' +
+                  '<circle cx="' + X(pts[0][0]) + '" cy="' + Y(pts[0][1]) + '" r="3.5" fill="' + C.rout + '"/>');
+        });
+      });
+      out.push('<g pointer-events="none">' + tp.join("") + '</g>');
+    }
+
+    // edge holes
+    part.ops.forEach(function (o) {
+      if (o.kind !== "edge" || !fin(o.s) || !fin(o.d) || !fin(o.depth)) return;
+      var on = isSel(o);
+      PART.edgePts(o, P).forEach(function (p, k) {
+        var rotp = (p.edge === "F" || p.edge === "B") && PART.CFG.drills_y_edges.indexOf(o.d) < 0;
+        var col = on ? C.sel : bad[o.id] ? C.err : rotp ? C.rot : C.edge, hw = Math.max(o.d / 2, 1.5 / s), dep = o.depth, rc;
+        switch (p.edge) {
+          case "L": rc = [0, p.s - hw, dep, p.s + hw]; break;
+          case "R": rc = [P.DX - dep, p.s - hw, P.DX, p.s + hw]; break;
+          case "F": rc = [p.s - hw, 0, p.s + hw, dep]; break;
+          case "B": rc = [p.s - hw, P.DY - dep, p.s + hw, P.DY]; break;
+        }
+        var ep = PART.edgePoint(p.edge, p.s, P), rr = Math.max(o.d / 2 * s, 4);
+        out.push(grp(o, k, 1, 1,
+          '<rect x="' + X(rc[0]) + '" y="' + Y(rc[3]) + '" width="' + ((rc[2] - rc[0]) * s).toFixed(2) + '" height="' + ((rc[3] - rc[1]) * s).toFixed(2) +
+          '" fill="' + col + '" fill-opacity=".18" stroke="' + col + '" stroke-width="' + (on ? 2 : 1.2) + '" stroke-dasharray="4 2.5"/>' +
+          '<circle cx="' + X(ep[0]) + '" cy="' + Y(ep[1]) + '" r="' + rr.toFixed(1) + '" fill="' + col + '"/>' +
+          (rotp ? txt(X(ep[0]) + (p.edge === "F" ? 0 : 0), Y(ep[1]) + (p.edge === "F" ? 15 : -15), "↻" + (nums.rot || ""), { c: C.rot, fs: 11, b: 1 }) : "") +
+          '<circle cx="' + X(ep[0]) + '" cy="' + Y(ep[1]) + '" r="' + Math.max(rr, 11) + '" fill="transparent"/>'));
+      });
+    });
+
+    // face holes
+    part.ops.forEach(function (o) {
+      if (o.kind !== "hole" || !fin(o.x) || !fin(o.y) || !fin(o.d)) return;
+      var on = isSel(o), bot = o.face === "B" && !o.through, er = bad[o.id];
+      PART.holePts(o, P).forEach(function (p) {
+        var r = Math.max(o.d / 2 * s, 3), cx = X(p.x), cy = Y(p.y), inner;
+        if (bot) inner = '<circle cx="' + cx + '" cy="' + cy + '" r="' + r.toFixed(1) + '" fill="rgba(123,31,162,.08)" stroke="' + (on ? C.sel : er ? C.err : C.bot) + '" stroke-width="' + (on ? 2.4 : 1.6) + '" stroke-dasharray="3 2"/>';
+        else inner = '<circle cx="' + cx + '" cy="' + cy + '" r="' + r.toFixed(1) + '" fill="' + (on ? C.sel : er ? C.err : C.top) + '" fill-opacity="' + (o.d >= 15 ? 0.78 : 1) + '"/>' +
+                     (o.through ? '<circle cx="' + cx + '" cy="' + cy + '" r="' + Math.max(1.2, r * 0.38).toFixed(1) + '" fill="#fff"/>' : '');
+        if (er && !on) inner += '<circle cx="' + cx + '" cy="' + cy + '" r="' + Math.max(r + 5, 10).toFixed(1) + '" fill="none" stroke="' + C.err + '" stroke-width="2"/>';
+        out.push(grp(o, p.k, p.sx, p.sy, inner + '<circle cx="' + cx + '" cy="' + cy + '" r="' + Math.max(r, 10) + '" fill="transparent"/>'));
+      });
+    });
+
+    // overall dimensions and edge names (inserted under the operations, so nothing hides a hole)
+    var top = Y(P.DY), bot2 = Y(0), lef = X(0), rig = X(P.DX), mark = out.length;
+    out.push('<path d="M' + lef + ' ' + (top - 34) + 'H' + rig + '" stroke="#7d8896" stroke-width="1" marker-start="url(#pbAg)" marker-end="url(#pbAg)"/>' +
+             '<path d="M' + lef + ' ' + (top - 40) + 'V' + (top - 4) + 'M' + rig + ' ' + (top - 40) + 'V' + (top - 4) + '" stroke="#b4bec9" stroke-width="1"/>' +
+             txt((lef + rig) / 2, top - 34, "X  " + n(P.DX) + " mm", { fs: 13, c: "#3f4956", b: 1, halo: C.bg }));
+    out.push('<path d="M' + (rig + 52) + ' ' + top + 'V' + bot2 + '" stroke="#7d8896" stroke-width="1" marker-start="url(#pbAg)" marker-end="url(#pbAg)"/>' +
+             '<path d="M' + (rig + 4) + ' ' + top + 'H' + (rig + 58) + 'M' + (rig + 4) + ' ' + bot2 + 'H' + (rig + 58) + '" stroke="#b4bec9" stroke-width="1"/>' +
+             txt(rig + 52, (top + bot2) / 2, "Y  " + n(P.DY) + " mm", { fs: 13, c: "#3f4956", b: 1, rot: -90, halo: C.bg }));
+    out.push(txt((lef + rig) / 2, bot2 + 18, "PRIEKIS", { fs: 11, c: "#8b97a6", halo: C.bg }) +
+             txt((lef + rig) / 2, top - 14, "GALAS", { fs: 11, c: "#8b97a6", halo: C.bg }) +
+             txt(lef - 16, (top + bot2) / 2, "KAIRĖ", { fs: 11, c: "#8b97a6", rot: -90, halo: C.bg }) +
+             txt(rig + 18, (top + bot2) / 2, "DEŠINĖ", { fs: 11, c: "#8b97a6", rot: 90, halo: C.bg }));
+    out.push('<circle cx="' + lef + '" cy="' + bot2 + '" r="4" fill="#1b2330" pointer-events="none"/>' +
+             txt(lef - 11, bot2 + 13, "0", { fs: 12, c: "#1b2330", b: 1, halo: C.bg }));
+    var labels = out.splice(mark, out.length - mark);
+    Array.prototype.splice.apply(out, [underAt, 0].concat(labels));
+
+    // dimensions of the selected operation
+    if (sel) out.push('<g pointer-events="none">' + selDims(sel, X, Y, txt) + '</g>');
+    el.svg.innerHTML = out.join("");
+  }
+
+  /* dimension lines from the reference edges the user measured from */
+  function selDims(o, X, Y, txt) {
+    var P = part, out = [], col = C.sel;
+    function lab(x, y, t, rot) { return txt(x, y, t, { fs: 12.5, c: col, b: 1, rot: rot }); }
+    function dimH(x0, x1, y, t, off) {        // mm coordinates, label offset in px
+      if (Math.abs(x1 - x0) < 1e-6) return "";
+      var a = X(Math.min(x0, x1)), b = X(Math.max(x0, x1)), yy = Y(y) + (off || 0);
+      return '<path d="M' + a + ' ' + yy + 'H' + b + '" stroke="' + col + '" stroke-width="1.3" marker-start="url(#pbA)" marker-end="url(#pbA)"/>' +
+             lab((a + b) / 2, yy - 10, t);
+    }
+    function dimV(y0, y1, x, t, off) {
+      if (Math.abs(y1 - y0) < 1e-6) return "";
+      var a = Y(Math.max(y0, y1)), b = Y(Math.min(y0, y1)), xx = X(x) + (off || 0);
+      return '<path d="M' + xx + ' ' + a + 'V' + b + '" stroke="' + col + '" stroke-width="1.3" marker-start="url(#pbA)" marker-end="url(#pbA)"/>' +
+             lab(xx - 11, (a + b) / 2, t, -90);
+    }
+    function refX(c, r) { return r === "R" ? P.DX : r === "C" ? P.DX / 2 : 0; }
+    function refY(c, r) { return r === "B" ? P.DY : r === "C" ? P.DY / 2 : 0; }
+    function lbl(v, r, L) { return r === "C" ? n(L / 2) + " (centras)" : n(v); }
+    try {
+      if (o.kind === "hole" || o.kind === "circle") {
+        var p0 = { x: PART.abs(o.x, o.xr, P.DX), y: PART.abs(o.y, o.yr, P.DY) };   // the measured point (centre of a centred group)
+        var ex = o.xr === "C" ? 0 : refX(0, o.xr), ey = o.yr === "C" ? 0 : refY(0, o.yr);
+        out.push(dimH(ex, p0.x, p0.y, lbl(o.x, o.xr, P.DX)));
+        out.push(dimV(ey, p0.y, p0.x, lbl(o.y, o.yr, P.DY)));
+        if (o.kind === "circle") out.push(lab(X(p0.x), Y(p0.y) - o.D / 2 * view.s - 10, "Ø" + n(o.D)));
+        if (o.kind === "hole" && o.n > 1) {
+          var pts = PART.holePts(o, P), lp = pts[Math.min(pts.length, o.n) - 1];
+          out.push(lab(X(lp.x) + (o.dir === "X" ? 0 : 30), Y(lp.y) + (o.dir === "X" ? 18 : 0), "×" + o.n + " kas " + n(o.step)));
+        }
+      } else if (o.kind === "edge") {
+        var e0 = PART.edgePts(o, P)[0], ep = PART.edgePoint(e0.edge, e0.s, P), inset = 16;
+        if (e0.edge === "L" || e0.edge === "R") {
+          var from = o.sr === "B" ? P.DY : 0;
+          out.push(dimV(from, e0.s, e0.edge === "L" ? 0 : P.DX, lbl(o.s, o.sr, P.DY), e0.edge === "L" ? inset + o.depth * view.s : -inset - o.depth * view.s));
+        } else {
+          var fx = o.sr === "R" ? P.DX : 0;
+          out.push(dimH(fx, e0.s, e0.edge === "F" ? 0 : P.DY, lbl(o.s, o.sr, P.DX), e0.edge === "F" ? -inset - o.depth * view.s : inset + o.depth * view.s));
+        }
+        out.push(txt(X(ep[0]) + (e0.edge === "L" ? 8 + o.depth * view.s : e0.edge === "R" ? -8 - o.depth * view.s : 0),
+                     Y(ep[1]) + (e0.edge === "F" ? -12 - o.depth * view.s : e0.edge === "B" ? 12 + o.depth * view.s : 0),
+                     "gylis " + n(o.depth), { fs: 11.5, c: col, a: e0.edge === "L" ? "start" : e0.edge === "R" ? "end" : "middle" }));
+      } else if (o.kind === "groove") {
+        var g = PART.grooveBox(o, P), mid = (Math.max(g.a0, 0) + Math.min(g.a1, g.along)) / 2;
+        if (g.dir === "X") {
+          if (o.pr !== "C") out.push(o.pr === "F" ? dimV(0, g.c0, mid, n(o.p)) : dimV(g.c1, P.DY, mid, n(o.p)));
+          out.push(lab(X(mid) + 46, Y(g.c0) + 12, n(o.w) + " × " + n(o.depth)));
+          if (!o.full) out.push(o.ar === "R" ? dimH(g.a1, P.DX, g.c1, n(o.a), -14) : o.ar === "L" ? dimH(0, g.a0, g.c1, n(o.a), -14) : "",
+                                dimH(g.a0, g.a1, g.c0, n(o.len), 16));
+        } else {
+          if (o.pr !== "C") out.push(o.pr === "L" ? dimH(0, g.c0, mid, n(o.p)) : dimH(g.c1, P.DX, mid, n(o.p)));
+          out.push(lab(X(g.c1) + 30, Y(mid) - 30, n(o.w) + " × " + n(o.depth)));
+          if (!o.full) out.push(o.ar === "B" ? dimV(g.a1, P.DY, g.c1, n(o.a), 16) : o.ar === "F" ? dimV(0, g.a0, g.c1, n(o.a), 16) : "",
+                                dimV(g.a0, g.a1, g.c0, n(o.len), -16));
+        }
+      } else if (o.kind === "notch") {
+        var nr = PART.notchRect(o, P), F = o.corner[0] === "F";
+        out.push(dimH(nr.x0, nr.x1, F ? nr.y1 : nr.y0, n(o.a), F ? -14 : 14));
+        var L2 = o.corner[1] === "L";
+        out.push(dimV(nr.y0, nr.y1, L2 ? nr.x1 : nr.x0, n(o.b), L2 ? 14 : -14));
+      } else if (o.kind === "cut") {
+        var cr = PART.cutRect(o, P), my = (cr.y0 + cr.y1) / 2, mx = (cr.x0 + cr.x1) / 2;
+        if (o.xr === "L") out.push(dimH(0, cr.x0, my, n(o.x))); else if (o.xr === "R") out.push(dimH(cr.x1, P.DX, my, n(o.x)));
+        if (o.yr === "F") out.push(dimV(0, cr.y0, mx, n(o.y))); else if (o.yr === "B") out.push(dimV(cr.y1, P.DY, mx, n(o.y)));
+        out.push(lab(X(mx), Y(my), n(o.w) + " × " + n(o.h)));
+      }
+    } catch (e) { /* half-typed numbers: draw nothing */ }
+    return out.join("");
+  }
+
+  /* ---------------------------------------------------------------- moving */
+  function moveOp(o, g0, dx, dy) {
+    var P = part;
+    function ax(vk, rk, L, d, near, far) {
+      var c = PART.abs(g0[vk], g0[rk], L) + d, ref = g0[rk];
+      if (ref === "C") { if (Math.abs(d) < 0.5) return; ref = c < L / 2 ? near : far; }
+      o[rk] = ref; o[vk] = Math.round(PART.rel(c, ref, L) * 10) / 10;
+    }
+    if (o.kind === "hole" || o.kind === "circle") {
+      ax("x", "xr", P.DX, dx, "L", "R"); ax("y", "yr", P.DY, dy, "F", "B");
+    } else if (o.kind === "edge") {
+      var LR = o.edge === "L" || o.edge === "R";
+      ax("s", "sr", PART.edgeLen(o.edge, P), LR ? dy : dx, LR ? "F" : "L", LR ? "B" : "R");
+    } else if (o.kind === "cut") {
+      var r0 = PART.cutRect(g0, P);
+      if (Math.abs(dx) >= 0.5 || g0.xr !== "C") {
+        var x0 = r0.x0 + dx, xr = g0.xr === "C" ? (x0 + g0.w / 2 < P.DX / 2 ? "L" : "R") : g0.xr;
+        o.xr = xr; o.x = Math.round((xr === "L" ? x0 : P.DX - x0 - g0.w) * 10) / 10;
+      }
+      if (Math.abs(dy) >= 0.5 || g0.yr !== "C") {
+        var y0 = r0.y0 + dy, yr = g0.yr === "C" ? (y0 + g0.h / 2 < P.DY / 2 ? "F" : "B") : g0.yr;
+        o.yr = yr; o.y = Math.round((yr === "F" ? y0 : P.DY - y0 - g0.h) * 10) / 10;
+      }
+    } else if (o.kind === "groove") {
+      var gb = PART.grooveBox(g0, P), d = g0.dir === "X" ? dy : dx;
+      if (g0.pr === "C" && Math.abs(d) < 0.5) return;
+      var c0 = gb.c0 + d, pr = g0.pr;
+      if (pr === "C") pr = c0 + g0.w / 2 < gb.across / 2 ? (g0.dir === "X" ? "F" : "L") : (g0.dir === "X" ? "B" : "R");
+      o.pr = pr; o.p = Math.round((pr === "F" || pr === "L" ? c0 : gb.across - c0 - g0.w) * 10) / 10;
+    }
+  }
+
+  function svgPoint(ev) {
+    var r = el.svg.getBoundingClientRect();
+    return { x: ev.clientX - r.left, y: ev.clientY - r.top };
+  }
+  function onDown(ev) {
+    if (ev.button !== undefined && ev.button !== 0) return;
+    var g = ev.target.closest && ev.target.closest("g.op");
+    if (!g) { if (selId !== null) { selId = null; render(); } return; }
+    var id = +g.dataset.id, o = null;
+    part.ops.forEach(function (q) { if (q.id === id) o = q; });
+    if (!o) return;
+    if (selId !== id) { selId = id; render(); }
+    var p = svgPoint(ev);
+    drag = { id: id, sx: +g.dataset.sx || 1, sy: +g.dataset.sy || 1, x0: p.x, y0: p.y, g0: JSON.parse(JSON.stringify(o)), moved: false };
+    try { el.svg.setPointerCapture(ev.pointerId); } catch (e) { /* fine */ }
+    ev.preventDefault();
+  }
+  function onMove(ev) {
+    if (!drag || !view) return;
+    var p = svgPoint(ev), dxp = p.x - drag.x0, dyp = p.y - drag.y0;
+    if (!drag.moved && Math.hypot(dxp, dyp) < 4) return;
+    var o = selOp(); if (!o || o.kind === "notch") return;
+    drag.moved = true;
+    var k = JSON.parse(JSON.stringify(drag.g0));
+    Object.keys(k).forEach(function (key) { o[key] = k[key]; });
+    moveOp(o, drag.g0, Math.round(dxp / view.s) * drag.sx, Math.round(-dyp / view.s) * drag.sy);
+    render({ keepPanel: true });
+  }
+  function onUp() {
+    if (drag && drag.moved) commit();
+    drag = null;
+  }
+
+  /* ---------------------------------------------------------------- footer */
+  var PICTO = {
+    main: '<svg viewBox="0 0 44 26"><rect x="3" y="4" width="38" height="18" rx="1" fill="#fff" stroke="#3f4956" stroke-width="1.4"/><circle cx="3" cy="22" r="2.6" fill="#1f6feb"/></svg>',
+    flip: '<svg viewBox="0 0 44 26"><rect x="3" y="4" width="38" height="18" rx="1" fill="#f1e6f8" stroke="#7b1fa2" stroke-width="1.4"/><circle cx="3" cy="4" r="2.6" fill="#1f6feb"/><path d="M36 9v8m-3-3 3 3 3-3" stroke="#7b1fa2" stroke-width="1.4" fill="none"/></svg>',
+    flipOnly: '<svg viewBox="0 0 44 26"><rect x="3" y="4" width="38" height="18" rx="1" fill="#f1e6f8" stroke="#7b1fa2" stroke-width="1.4"/><circle cx="3" cy="4" r="2.6" fill="#1f6feb"/></svg>',
+    rot: '<svg viewBox="0 0 44 26"><rect x="14" y="1" width="16" height="24" rx="1" fill="#fff3df" stroke="#b26a00" stroke-width="1.4"/><circle cx="14" cy="1" r="2.4" fill="#1f6feb"/><path d="M39 17a8 8 0 0 0-5-11m0 0 4 0m-4 0 1 4" stroke="#b26a00" stroke-width="1.4" fill="none"/></svg>'
+  };
+  var HOW = {
+    main: "Plokštė guli kaip brėžinyje — 0 taškas priekis-kairė.",
+    flip: "Po 1OP apverskite per ilgąją briauną: priekis ↔ galas, kairė lieka kairėje.",
+    flipOnly: "Dėkite apverstą (apačia į viršų): priekis ↔ galas, kairė lieka kairėje.",
+    rot: "Ta pati pusė viršuje, pasukite 90° prieš laikrodžio rodyklę — priekis tampa kairiuoju galu."
+  };
+  function renderFoot() {
+    var b = built, st = el.status;
+    el.dl.disabled = el.send.disabled = !(b && b.ok && b.programs.length);
+    if (!b) return;
+    var errs = b.check.errors;
+    if (errs) { st.className = "st bad"; st.textContent = "✗ " + plural(errs, "klaida", "klaidos", "klaidų") + " — pataisykite"; }
+    else if (!b.programs.length) { st.className = "st"; st.textContent = "Pridėkite operacijų"; }
+    else { st.className = "st ok"; st.textContent = "✓ Paruošta: " + plural(b.programs.length, "programa", "programos", "programų"); }
+    el.dl.textContent = "⬇ Atsisiųsti" + (b.programs.length > 1 ? " (" + b.programs.length + ")" : "");
+    if (!b.programs.length) {
+      el.progs.innerHTML = '<div class="pb-prog none">' + (errs ? "Programos atsiras, kai pataisysite klaidas." : "Programos atsiras čia.") + '</div>';
+      return;
+    }
+    el.progs.innerHTML = b.programs.map(function (pg, i) {
+      var nb = pg.bores.length, nr = pg.routes.length, c = [];
+      if (nb) c.push(plural(nb, "skylė", "skylės", "skylių"));
+      if (nr) c.push(plural(nr, "frezavimas", "frezavimai", "frezavimų"));
+      return '<div class="pb-prog k-' + pg.kind + '"><div class="h"><span class="op">' + pg.op + 'OP</span><span class="fn" title="' + escH(pg.file) + '">' + escH(pg.file) + '</span>' +
+        '<button type="button" class="ghost" data-p3d="' + i + '">3D</button><button type="button" class="ghost" data-pcode="' + i + '">Kodas</button></div>' +
+        '<div class="c">' + c.join(" · ") + ' · ' + n(pg.DX) + '×' + n(pg.DY) + '</div>' +
+        '<div class="i">' + PICTO[pg.kind] + '<span>' + HOW[pg.kind] + '</span></div></div>';
+    }).join("");
+  }
+
+  /* ---------------------------------------------------------------- render */
+  function render(o) {
+    o = o || {};
+    built = PART.build(part);
+    renderSvg(); renderList(); renderFoot();
+    if (o.keepPanel) panelMsgs(); else renderPanel();
+    if (o.keepProps) opMsgs(); else renderProps();
+    if (document.activeElement !== el.name) el.name.value = part.name || "";
+  }
+
+  /* ---------------------------------------------------------------- actions */
+  function addOp(kind) {
+    var o = PART.make(kind, part);
+    if (!o) return;
+    if (kind === "hole" || kind === "edge") {          // do not stack new holes on old ones
+      for (var t = 0; t < 40; t++) {
+        var clash = part.ops.some(function (q) {
+          return q.kind === o.kind && (o.kind === "hole" ? q.xr === o.xr && q.yr === o.yr && q.x === o.x && q.y === o.y : q.edge === o.edge && q.sr === o.sr && q.s === o.s);
+        });
+        if (!clash) break;
+        if (kind === "hole") o.x += 50; else o.s += 50;
+      }
+    }
+    if (kind === "notch") {
+      var used = {}; part.ops.forEach(function (q) { if (q.kind === "notch") used[q.corner] = 1; });
+      ["BR", "FR", "BL", "FL"].some(function (c) { if (!used[c]) { o.corner = c; return true; } return false; });
+    }
+    part.ops.push(o); selId = o.id; commit(); render();
+  }
+  function delOp() {
+    var o = selOp(); if (!o) return;
+    part.ops = part.ops.filter(function (q) { return q.id !== o.id; });
+    selId = null; commit(); render();
+  }
+  function dupOp() {
+    var o = selOp(); if (!o) return;
+    var c = JSON.parse(JSON.stringify(o)), g0 = JSON.parse(JSON.stringify(o));
+    c.id = PART.make("hole", part).id;
+    if (c.kind === "notch") {
+      var used = {}; part.ops.forEach(function (q) { if (q.kind === "notch") used[q.corner] = 1; });
+      ["BR", "FR", "BL", "FL"].some(function (k) { if (!used[k]) { c.corner = k; return true; } return false; });
+    } else if (c.kind === "groove") moveOp(c, g0, c.dir === "Y" ? 40 : 0, c.dir === "X" ? 40 : 0);
+    else moveOp(c, g0, 50, 0);
+    part.ops.push(c); selId = c.id; commit(); render();
+  }
+
+  function toast(msg, bad) {
+    var t = document.createElement("div");
+    t.className = "pb-toast" + (bad ? " bad" : ""); t.textContent = msg;
+    document.body.appendChild(t);
+    setTimeout(function () { t.remove(); }, bad ? 5000 : 3200);
+  }
+
+  function download(pg) {
+    var b = new Blob([pg.text], { type: "text/plain;charset=utf-8" });
+    var a = document.createElement("a");
+    a.href = URL.createObjectURL(b); a.download = pg.file;
+    document.body.appendChild(a); a.click();
+    setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 800);
+  }
+  function downloadAll() {
+    if (!built || !built.ok) return;
+    commit();
+    built.programs.forEach(function (pg, i) { setTimeout(function () { download(pg); }, i * 350); });
+    toast("Atsisiunčiama: " + built.programs.map(function (p) { return p.file; }).join(", "));
+  }
+  function send() {
+    if (!built || !built.ok || !built.programs.length) return;
+    commit();
+    if (typeof OUT === "undefined" || !OUT.supported()) {
+      toast("Tiesioginis įrašymas veikia tik Chrome arba Edge — naudokite „Atsisiųsti“.", true); return;
+    }
+    var progs = built.programs.slice();
+    OUT.state().then(function (st) {
+      if (st === "granted") return true;
+      if (st === "none") return OUT.pick();
+      return OUT.grant().then(function () { return OUT.state(); }).then(function (s2) { return s2 === "granted"; });
+    }).then(function (ok) {
+      if (window.outRefresh) try { window.outRefresh(); } catch (e) { /* fine */ }
+      if (!ok) { toast("Aplankas nepasirinktas — programos neįrašytos.", true); return; }
+      var done = [], fail = [];
+      (function next(i) {
+        if (i >= progs.length) {
+          if (fail.length) toast("Neįrašyta: " + fail.join(", "), true);
+          else toast("Įrašyta į „" + OUT.name() + "“: " + done.join(", "));
+          return;
+        }
+        OUT.write(progs[i].file, progs[i].text).then(function (r) {
+          (r.ok ? done : fail).push(progs[i].file + (r.over ? " (perrašyta)" : ""));
+          next(i + 1);
+        });
+      })(0);
+    });
+  }
+
+  function showCode(pg) {
+    var m = document.createElement("div");
+    m.className = "pb-modal";
+    m.innerHTML = '<div class="box"><div class="hd"><span>' + escH(pg.file) + '</span>' +
+      '<button type="button" class="ghost" data-x="copy">Kopijuoti</button><button type="button" class="ghost" data-x="dl">Atsisiųsti</button>' +
+      '<button type="button" class="ghost" data-x="close">Uždaryti ✕</button></div><pre>' + escH(pg.text) + '</pre></div>';
+    m.addEventListener("click", function (e) {
+      var x = e.target.dataset && e.target.dataset.x;
+      if (e.target === m || x === "close") m.remove();
+      if (x === "dl") download(pg);
+      if (x === "copy") {
+        var ok = function () { toast("Nukopijuota."); };
+        if (navigator.clipboard) navigator.clipboard.writeText(pg.text).then(ok, function () { toast("Nepavyko nukopijuoti.", true); });
+      }
+    });
+    document.body.appendChild(m);
+  }
+  function show3d(pg) {
+    if (typeof V3D === "undefined") return;
+    V3D.open({ name: pg.file, doc: pg.view, skip: {}, sel: {}, plain: true });
+  }
+
+  /* library of saved parts */
+  function libList() { var l = load(KEY_LIB); return Array.isArray(l) ? l : []; }
+  function savePart() {
+    commit();
+    var nm = String(part.name || "").trim();
+    if (!nm) { toast("Įveskite pavadinimą.", true); el.name.focus(); return; }
+    var l = libList(), i = -1;
+    l.forEach(function (e, k) { if (e.name === nm) i = k; });
+    if (i >= 0 && JSON.stringify(l[i].part) !== JSON.stringify(part) &&
+        !confirm("Detalė „" + nm + "“ jau išsaugota. Perrašyti?")) return;
+    var e = { name: nm, part: JSON.parse(JSON.stringify(part)), t: Date.now() };
+    if (i >= 0) l[i] = e; else l.push(e);
+    store(KEY_LIB, l);
+    toast("Išsaugota „" + nm + "“ (šiame kompiuteryje).");
+  }
+  function closePop() { var p = document.querySelector(".pb-pop"); if (p) p.remove(); }
+  function openLib() {
+    if (document.querySelector(".pb-pop")) { closePop(); return; }
+    var l = libList().sort(function (a, b) { return b.t - a.t; });
+    var pop = document.createElement("div");
+    pop.className = "pb-pop";
+    var r = el.libBtn.getBoundingClientRect();
+    pop.style.top = (r.bottom + 6) + "px";
+    pop.style.left = Math.max(8, Math.min(window.innerWidth - 368, r.right - 360)) + "px";
+    pop.innerHTML = '<div class="hd"><span>Išsaugotos detalės (' + l.length + ')</span><button type="button" class="ghost" data-x="close" style="padding:3px 9px">✕</button></div><div class="bd">' +
+      (l.length ? l.map(function (e, k) {
+        var d = new Date(e.t);
+        return '<div class="pb-lib"><div><div class="n">' + escH(e.name) + '</div><div class="m">' + n(e.part.DX) + '×' + n(e.part.DY) + '×' + n(e.part.DZ) +
+          ' · ' + plural(e.part.ops.length, "operacija", "operacijos", "operacijų") + ' · ' + d.toLocaleDateString("lt-LT") + '</div></div>' +
+          '<button type="button" data-open="' + k + '">Atidaryti</button><button type="button" class="ghost" data-delp="' + k + '" title="Ištrinti">✕</button></div>';
+      }).join("") : '<div class="pb-empty">Dar nieko neišsaugota. Sukurkite detalę ir spauskite „Išsaugoti“ — ji liks šiame kompiuteryje.</div>') + '</div>';
+    pop.addEventListener("click", function (e) {
+      var t = e.target;
+      if (t.dataset.x === "close") closePop();
+      if (t.dataset.open !== undefined) {
+        var en = l[+t.dataset.open];
+        if (part.ops.length && JSON.stringify(part) !== JSON.stringify(en.part) &&
+            !confirm("Atidaryti „" + en.name + "“? Dabartinė detalė ekrane bus pakeista.")) return;
+        commit(); part = JSON.parse(JSON.stringify(en.part)); selId = null; commit(); closePop(); render();
+      }
+      if (t.dataset.delp !== undefined) {
+        var en2 = l[+t.dataset.delp];
+        if (!confirm("Ištrinti „" + en2.name + "“ iš išsaugotų?")) return;
+        store(KEY_LIB, libList().filter(function (x) { return !(x.name === en2.name && x.t === en2.t); }));
+        closePop(); openLib();
+      }
+    });
+    document.body.appendChild(pop);
+  }
+
+  /* ---------------------------------------------------------------- wiring */
+  var holdT = null, holdI = null;
+  function stopHold() { clearTimeout(holdT); clearInterval(holdI); holdT = holdI = null; }
+  function stepNum(box, delta) {
+    var tgt = box.dataset.tgt === "part" ? part : selOp(), key = box.dataset.k;
+    if (!tgt) return;
+    var v = fin(tgt[key]) ? tgt[key] : 0, nv = Math.round((v + delta) * 1000) / 1000;
+    if (box.dataset.int) nv = Math.max(1, Math.round(nv));
+    if (key === "DX" || key === "DY" || key === "DZ" || key === "d" || key === "D" || key === "w" || key === "h" || key === "len" || key === "a" || key === "b") nv = Math.max(1, nv);
+    if (key === "depth" || key === "step" || key === "x" || key === "y" || key === "s" || key === "p") nv = Math.max(0, nv);
+    tgt[key] = nv;
+    var inp = box.querySelector("input"); if (inp) { inp.value = fmtIn(nv); inp.classList.remove("bad"); }
+    render({ keepPanel: true, keepProps: true });
+    later();
+  }
+
+  function wireForm(root) {
+    root.addEventListener("input", function (e) {
+      var inp = e.target, box = inp.closest && inp.closest(".pb-num");
+      if (!box) return;
+      var tgt = box.dataset.tgt === "part" ? part : selOp(); if (!tgt) return;
+      var v = parseIn(inp.value);
+      if (box.dataset.int && fin(v)) v = Math.round(v);
+      inp.classList.toggle("bad", !fin(v));
+      if (!fin(v)) return;
+      tgt[box.dataset.k] = v;
+      render({ keepPanel: true, keepProps: true });
+      later();
+    });
+    root.addEventListener("change", function (e) {
+      var t = e.target;
+      if (t.dataset && t.dataset.chk) {
+        var o = selOp(); if (!o) return;
+        o[t.dataset.chk] = t.checked;
+        if (t.dataset.chk === "through" && t.checked) o.face = "T";
+        commit(); render({ keepPanel: true });
+        return;
+      }
+      if (t.closest && t.closest(".pb-num")) {
+        commit();
+        // refresh labels/chips once the user has left the form (re-rendering under the cursor would steal focus)
+        var box = t.closest(".pb-num");
+        setTimeout(function () {
+          if (box.dataset.tgt === "part") { if (!el.panel.contains(document.activeElement)) renderPanel(); }
+          else if (!el.right.contains(document.activeElement)) renderProps();
+        }, 0);
+      }
+    });
+    root.addEventListener("keydown", function (e) {
+      var t = e.target;
+      if (t.tagName === "INPUT" && t.type === "text" && (e.key === "ArrowUp" || e.key === "ArrowDown")) {
+        var box = t.closest(".pb-num"); if (!box) return;
+        e.preventDefault();
+        stepNum(box, (e.key === "ArrowUp" ? 1 : -1) * (e.shiftKey ? 10 : 1));
+      }
+      if (t.tagName === "INPUT" && e.key === "Enter") t.blur();
+    });
+    root.addEventListener("pointerdown", function (e) {
+      var b = e.target.closest && e.target.closest("button[data-step]");
+      if (!b) return;
+      e.preventDefault();
+      var box = b.closest(".pb-num"), d = parseFloat(b.dataset.step), reps = 0;
+      stepNum(box, d);
+      holdT = setTimeout(function () {
+        holdI = setInterval(function () { reps++; stepNum(box, d * (reps > 15 ? 10 : 1)); }, 80);
+      }, 420);
+    });
+    ["pointerup", "pointerleave", "pointercancel"].forEach(function (ev) {
+      root.addEventListener(ev, function () {
+        if (holdT || holdI) { stopHold(); commit(); if (root === el.right) renderProps(); else renderPanel(); }
+      });
+    });
+    root.addEventListener("click", function (e) {
+      var b = e.target.closest && e.target.closest("button");
+      if (!b) return;
+      if (b.dataset.set) {
+        var o = selOp(); if (!o) return;
+        setOpt(o, b.dataset.set, JSON.parse(b.dataset.v));
+        commit(); render({ keepPanel: true });
+      }
+      if (b.dataset.pset) { part[b.dataset.pset] = +b.dataset.v; commit(); render(); }
+      if (b.dataset.act === "del") delOp();
+      if (b.dataset.act === "dup") dupOp();
+    });
+  }
+
+  function open() {
+    if (!loaded) {
+      var d = load(KEY_DRAFT);
+      if (d && d.part && Array.isArray(d.part.ops)) { part = d.part; selId = d.sel; if (!selOp()) selId = null; }
+      last = snap(); loaded = true; undoBtns();
+    }
+    el.root.hidden = false;
+    document.body.style.overflow = "hidden";
+    render();
+    requestAnimationFrame(renderSvg);
+  }
+  function close() {
+    commit(); closePop();
+    el.root.hidden = true;
+    document.body.style.overflow = "";
+  }
+
+  function init() {
+    el.root = $("pb"); if (!el.root) return;
+    el.name = $("pbName"); el.panel = $("pbPanel"); el.tiles = $("pbTiles"); el.ops = $("pbOps"); el.count = $("pbCount");
+    el.stage = $("pbStage"); el.svg = $("pbSvg"); el.right = $("pbRight"); el.progs = $("pbProgs"); el.status = $("pbStatus");
+    el.dl = $("pbDl"); el.send = $("pbSend"); el.undo = $("pbUndo"); el.redo = $("pbRedo"); el.libBtn = $("pbLibBtn");
+
+    el.tiles.innerHTML = TILES.map(function (t) {
+      return '<button type="button" class="pb-tile" data-add="' + t[0] + '">' + icon(t[0]) + '<span>' + t[1] + '<small>' + t[2] + '</small></span></button>';
+    }).join("");
+    el.tiles.addEventListener("click", function (e) {
+      var b = e.target.closest("[data-add]"); if (b) addOp(b.dataset.add);
+    });
+    el.ops.addEventListener("click", function (e) {
+      var r = e.target.closest(".pb-op"); if (!r) return;
+      selId = +r.dataset.id; render();
+    });
+    wireForm(el.panel); wireForm(el.right);
+    el.name.addEventListener("input", function () { part.name = el.name.value; built = PART.build(part); renderFoot(); panelMsgs(); later(); });
+    el.name.addEventListener("change", commit);
+    $("pbPath").addEventListener("change", function (e) { showPath = e.target.checked; renderSvg(); });
+    el.svg.addEventListener("pointerdown", onDown);
+    el.svg.addEventListener("pointermove", onMove);
+    el.svg.addEventListener("pointerup", onUp);
+    el.svg.addEventListener("pointercancel", onUp);
+    el.undo.addEventListener("click", undo);
+    el.redo.addEventListener("click", redo);
+    $("pbClose").addEventListener("click", close);
+    $("pbSave").addEventListener("click", savePart);
+    el.libBtn.addEventListener("click", openLib);
+    $("pbNew").addEventListener("click", function () {
+      if (part.ops.length && !confirm("Pradėti naują detalę? Dabartinė bus išvalyta (jei reikia — pirma „Išsaugoti“).")) return;
+      commit();
+      var dz = part.DZ; part = PART.blank(); part.DZ = dz; selId = null; commit(); render();
+    });
+    el.dl.addEventListener("click", downloadAll);
+    el.send.addEventListener("click", send);
+    el.progs.addEventListener("click", function (e) {
+      var b = e.target.closest("button"); if (!b || !built) return;
+      if (b.dataset.p3d !== undefined) show3d(built.programs[+b.dataset.p3d]);
+      if (b.dataset.pcode !== undefined) showCode(built.programs[+b.dataset.pcode]);
+    });
+    el.status.addEventListener("click", function () {
+      if (!built || !built.check.errors) return;
+      var first = part.ops.filter(function (o) { return (built.check.ops[o.id] || []).some(function (x) { return x.level === "err"; }); })[0];
+      if (first) { selId = first.id; render(); }
+      else { var i = el.panel.querySelector("input"); if (i) i.focus(); }
+    });
+    window.addEventListener("resize", function () { if (!el.root.hidden) renderSvg(); });
+    document.addEventListener("keydown", function (e) {
+      if (el.root.hidden) return;
+      var v3 = $("v3d"); if (v3 && v3.classList.contains("on")) return;
+      var modal = document.querySelector(".pb-modal");
+      if (e.key === "Escape") {
+        if (modal) { modal.remove(); return; }
+        if (document.querySelector(".pb-pop")) { closePop(); return; }
+        if (selId !== null) { selId = null; render(); }
+        return;
+      }
+      if (modal) return;
+      var tag = (e.target.tagName || "").toUpperCase();
+      if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") return;
+      var mod = e.ctrlKey || e.metaKey;
+      if (mod && (e.key === "z" || e.key === "Z") && !e.shiftKey) { e.preventDefault(); undo(); return; }
+      if (mod && (e.key === "y" || ((e.key === "z" || e.key === "Z") && e.shiftKey))) { e.preventDefault(); redo(); return; }
+      if (mod && (e.key === "d" || e.key === "D")) { e.preventDefault(); dupOp(); return; }
+      var o = selOp(); if (!o) return;
+      if (e.key === "Delete" || e.key === "Backspace") { e.preventDefault(); delOp(); return; }
+      var st = e.shiftKey ? 10 : 1, d = { ArrowLeft: [-st, 0], ArrowRight: [st, 0], ArrowUp: [0, st], ArrowDown: [0, -st] }[e.key];
+      if (d && o.kind !== "notch") {
+        e.preventDefault();
+        moveOp(o, JSON.parse(JSON.stringify(o)), d[0], d[1]);
+        render(); later();
+      }
+    });
+    document.addEventListener("pointerdown", function (e) {
+      var p = document.querySelector(".pb-pop");
+      if (p && !p.contains(e.target) && e.target !== el.libBtn) closePop();
+    });
+    var ob = $("pbOpen"); if (ob) ob.addEventListener("click", open);
+  }
+
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init); else init();
+  return { open: open, close: close, get: function () { return part; },
+           set: function (p) { part = p; selId = null; commit(); render(); }, built: function () { return built; },
+           select: function (id) { selId = id; render(); } };
 })();
 </script>
 </body>
