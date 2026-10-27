@@ -1023,6 +1023,37 @@ async function run(){
     ck("Kablelis priimamas (12,5)", w.PB.get().ops[0].depth === 12.5, w.PB.get().ops[0].depth);
     ck("Telpa į 1280×1024 be slinkimo", doc.getElementById("pb").scrollHeight <= 1024 && doc.getElementById("pb").scrollWidth <= 1280,
        doc.getElementById("pb").scrollWidth + "×" + doc.getElementById("pb").scrollHeight);
+    // type a value straight on the drawing
+    w.PB.set({ v: 1, name: "INL", DX: 720, DY: 400, DZ: 18, ops: [] });
+    doc.querySelector('#pbTiles [data-add="hinge"]').click();
+    await new Promise(function (r) { setTimeout(r, 100); });
+    var ekx = doc.querySelector('#pbSvg .ek[data-ek="x"]');
+    ck("Brėžinyje skaičiai spaudžiami", !!ekx && !!doc.querySelector('#pbSvg .ek[data-ek="DX"]'));
+    if (ekx) {
+      ekx.dispatchEvent(new PointerEvent("pointerdown", { bubbles: true, button: 0 }));
+      var box = doc.querySelector(".pb-inl");
+      ck("Atsidaro įvedimo laukelis su reikšme", !!box && box.value === "100", box && box.value);
+      if (box) {
+        box.value = "120,5";
+        box.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true }));
+        ck("Įvesta reikšmė pritaikyta", w.PB.get().ops[0].x === 120.5, w.PB.get().ops[0].x);
+      }
+    }
+    var ekd = doc.querySelector('#pbSvg .ek[data-ek="DX"]');
+    ekd.dispatchEvent(new PointerEvent("pointerdown", { bubbles: true, button: 0 }));
+    var bx2 = doc.querySelector(".pb-inl"); bx2.value = "900";
+    bx2.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true }));
+    ck("Esc atšaukia", w.PB.get().DX === 720 && !doc.querySelector(".pb-inl"), w.PB.get().DX);
+    // copy / paste
+    w.PB.select(w.PB.get().ops[0].id);
+    doc.dispatchEvent(new KeyboardEvent("keydown", { key: "c", ctrlKey: true, bubbles: true }));
+    doc.dispatchEvent(new KeyboardEvent("keydown", { key: "v", ctrlKey: true, bubbles: true }));
+    var ops2 = w.PB.get().ops;
+    ck("Ctrl+C / Ctrl+V: kopija atsiranda šalia", ops2.length === 2 && ops2[1].x === 170.5 && ops2[1].id !== ops2[0].id,
+       JSON.stringify(ops2.map(function (q) { return [q.id, q.x]; })));
+    w.PB.set({ v: 1, name: "KITA", DX: 1000, DY: 500, DZ: 18, ops: [] });
+    doc.querySelector('#pbClipBar [data-clip="paste"]').click();
+    ck("Įklijuojama į kitą detalę toje pačioje vietoje", w.PB.get().ops.length === 1 && w.PB.get().ops[0].x === 120.5);
     doc.getElementById("pbClose").click();
     ck("Uždaromas", doc.getElementById("pb").hidden);
     ck("Klaidų nebuvo", errs2.length === 0, JSON.stringify(errs2));

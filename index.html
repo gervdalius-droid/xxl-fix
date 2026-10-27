@@ -304,8 +304,17 @@ header .grow{flex:1}
 .pb-ph svg{width:30px;height:30px;flex:0 0 30px;color:var(--pick)}
 .pb-ph .t{font-weight:700;font-size:14px;flex:1;line-height:1.25}
 .pb-ph .t small{display:block;font-weight:500;color:var(--tx2);font-size:11.5px}
-.pb-ph button{padding:5px 9px;font-size:12px}
-.pb-ph .del{background:#fdecec;color:var(--bad);border:1px solid #f0b7b7}
+.pb-pa{display:flex;gap:6px;padding:8px 13px;border-bottom:1px solid var(--line);background:#f6f1fa}
+.pb-pa button{flex:1;padding:6px 6px;font-size:12.5px}
+.pb-pa .del{background:#fdecec;color:var(--bad);border:1px solid #f0b7b7}
+.pb-clip{display:flex;gap:6px;flex-wrap:wrap}
+.pb-clip:empty{display:none}
+.pb-clip button{padding:4px 9px;font-size:12px}
+.pb-svg .ek{cursor:text;text-decoration:underline dotted;text-underline-offset:3px}
+.pb-svg .ek:hover{fill:#1f6feb}
+.pb-inl{position:absolute;z-index:5;height:34px;padding:4px 8px;border:2px solid var(--pick)!important;border-radius:8px;
+        background:#fff!important;font-family:var(--mono);font-size:15px!important;font-weight:700;text-align:center;
+        box-shadow:0 4px 14px rgba(123,31,162,.25);outline:none}
 .pb-props{padding:11px 13px}
 .pb-props .grp{border-top:1px dashed var(--line);margin-top:9px;padding-top:9px}
 .pb-msgs{margin-top:10px;display:flex;flex-direction:column;gap:5px}
@@ -472,6 +481,7 @@ header .grow{flex:1}
       </div>
       <div class="pb-sec" style="border-bottom:0;padding-bottom:4px">
         <h3><span class="n">3</span> Operacijos <span class="cnt" id="pbCount"></span></h3>
+        <div class="pb-clip" id="pbClipBar"></div>
       </div>
       <div class="pb-ops" id="pbOps"></div>
     </aside>
@@ -484,7 +494,7 @@ header .grow{flex:1}
         <span><i style="background:#d98200;border-radius:2px"></i>briaunoje</span>
         <span><i style="background:#9fd3b6;border-radius:2px"></i>frezuojama</span>
       </div>
-      <div class="tip">Vilkite operaciją pele &middot; rodyklės ±1 mm (Shift ±10) &middot; Delete — ištrinti</div>
+      <div class="tip">Spustelėkite skaičių — įveskite naują &middot; vilkite operaciją &middot; rodyklės ±1 mm (Shift ±10)<br>Ctrl+C / Ctrl+V — kopijuoti / įklijuoti &middot; Delete — ištrinti</div>
     </div>
     <aside class="pb-col pb-right" id="pbRight"></aside>
   </div>
@@ -3553,9 +3563,10 @@ var PB = (function () {
     }
     var P = part, nums = progNums(), pk = opKind(o), h = "";
     h += '<div class="pb-ph">' + icon(kindOf(o), C.sel) + '<div class="t">' + escH(title(o)) +
-         '<small>' + (nums[pk] ? nums[pk] + "OP" : "") + (pk === "flip" ? " · apverstai" : pk === "rot" ? " · pasukus 90°" : "") + '</small></div>' +
-         '<button type="button" class="ghost" data-act="dup" title="Kopijuoti (Ctrl+D)">Kopijuoti</button>' +
-         '<button type="button" class="del" data-act="del" title="Ištrinti (Delete)">Ištrinti</button></div>';
+         '<small>' + (nums[pk] ? nums[pk] + "OP" : "") + (pk === "flip" ? " · apverstai" : pk === "rot" ? " · pasukus 90°" : "") + '</small></div></div>' +
+         '<div class="pb-pa"><button type="button" class="ghost" data-act="copy" title="Kopijuoti (Ctrl+C), įklijuoti Ctrl+V">⧉ Kopijuoti</button>' +
+         '<button type="button" class="ghost" data-act="dup" title="Dubliuoti šalia (Ctrl+D)">＋ Dubliuoti</button>' +
+         '<button type="button" class="del" data-act="del" title="Ištrinti (Delete)">✕ Ištrinti</button></div>';
     h += '<div class="pb-props">';
     if (o.kind === "hole") {
       h += seg("Pusė", "face", [["T", "Viršus"], ["B", "Apačia", o.through]], o.through ? "T" : o.face);
@@ -3672,7 +3683,11 @@ var PB = (function () {
 
   /* ---------------------------------------------------------------- list */
   function renderList() {
-    var nums = progNums(), chkd = built ? built.check.ops : {};
+    var nums = progNums(), chkd = built ? built.check.ops : {}, cl = clipGet();
+    var bar = $("pbClipBar");
+    if (bar) bar.innerHTML =
+      (part.ops.length ? '<button type="button" class="ghost" data-clip="all" title="Nukopijuoti visas šios detalės operacijas">⧉ Kopijuoti visas</button>' : '') +
+      (cl.length ? '<button type="button" class="ghost" data-clip="paste" title="Ctrl+V">⎘ Įklijuoti (' + cl.length + ')</button>' : '');
     el.count.textContent = part.ops.length ? part.ops.length : "";
     if (!part.ops.length) {
       el.ops.innerHTML = '<div class="pb-empty">Kol kas operacijų nėra. Paspauskite operaciją viršuje.</div>';
@@ -3837,10 +3852,10 @@ var PB = (function () {
     var top = Y(P.DY), bot2 = Y(0), lef = X(0), rig = X(P.DX), mark = out.length;
     out.push('<path d="M' + lef + ' ' + (top - 34) + 'H' + rig + '" stroke="#7d8896" stroke-width="1" marker-start="url(#pbAg)" marker-end="url(#pbAg)"/>' +
              '<path d="M' + lef + ' ' + (top - 40) + 'V' + (top - 4) + 'M' + rig + ' ' + (top - 40) + 'V' + (top - 4) + '" stroke="#b4bec9" stroke-width="1"/>' +
-             txt((lef + rig) / 2, top - 34, "X  " + n(P.DX) + " mm", { fs: 13, c: "#3f4956", b: 1, halo: C.bg }));
+             etxt((lef + rig) / 2, top - 34, ["X  ", { k: "DX", t: n(P.DX), tgt: "part" }, " mm"], { fs: 13, c: "#3f4956", halo: C.bg }));
     out.push('<path d="M' + (rig + 52) + ' ' + top + 'V' + bot2 + '" stroke="#7d8896" stroke-width="1" marker-start="url(#pbAg)" marker-end="url(#pbAg)"/>' +
              '<path d="M' + (rig + 4) + ' ' + top + 'H' + (rig + 58) + 'M' + (rig + 4) + ' ' + bot2 + 'H' + (rig + 58) + '" stroke="#b4bec9" stroke-width="1"/>' +
-             txt(rig + 52, (top + bot2) / 2, "Y  " + n(P.DY) + " mm", { fs: 13, c: "#3f4956", b: 1, rot: -90, halo: C.bg }));
+             etxt(rig + 52, (top + bot2) / 2, ["Y  ", { k: "DY", t: n(P.DY), tgt: "part" }, " mm"], { fs: 13, c: "#3f4956", rot: -90, halo: C.bg }));
     out.push(txt((lef + rig) / 2, bot2 + 18, "PRIEKIS", { fs: 11, c: "#8b97a6", halo: C.bg }) +
              txt((lef + rig) / 2, top - 14, "GALAS", { fs: 11, c: "#8b97a6", halo: C.bg }) +
              txt(lef - 16, (top + bot2) / 2, "KAIRĖ", { fs: 11, c: "#8b97a6", rot: -90, halo: C.bg }) +
@@ -3851,78 +3866,190 @@ var PB = (function () {
     Array.prototype.splice.apply(out, [underAt, 0].concat(labels));
 
     // dimensions of the selected operation
-    if (sel) out.push('<g pointer-events="none">' + selDims(sel, X, Y, txt) + '</g>');
+    if (sel) out.push('<g pointer-events="none">' + selDims(sel, X, Y) + '</g>');
     el.svg.innerHTML = out.join("");
   }
 
-  /* dimension lines from the reference edges the user measured from */
-  function selDims(o, X, Y, txt) {
+  /* dimension lines from the reference edges the user measured from.
+     Every number is clickable: it opens a small box right there to type the value. */
+  function etxt(x, y, parts, o) {          // text made of parts; a part with k is editable
+    o = o || {};
+    return '<text x="' + x + '" y="' + y + '" font-size="' + (o.fs || 12.5) + '" fill="' + (o.c || C.sel) + '" text-anchor="' + (o.a || "middle") + '"' +
+      (o.rot ? ' transform="rotate(' + o.rot + ' ' + x + ' ' + y + ')"' : '') + ' font-weight="700"' +
+      ' stroke="' + (o.halo || "#fff") + '" stroke-width="3.5" paint-order="stroke" dominant-baseline="middle" pointer-events="none">' +
+      parts.map(function (p) {
+        if (typeof p === "string") return '<tspan>' + escH(p) + '</tspan>';
+        return '<tspan class="ek" pointer-events="all" data-ek="' + p.k + '" data-tgt="' + (p.tgt || "op") + '"' +
+          (p.ref ? ' data-eref="' + p.ref + '"' : '') + (p.int ? ' data-int="1"' : '') + '>' + escH(p.t) + '</tspan>';
+      }).join("") + '</text>';
+  }
+  function selDims(o, X, Y) {
     var P = part, out = [], col = C.sel;
-    function lab(x, y, t, rot) { return txt(x, y, t, { fs: 12.5, c: col, b: 1, rot: rot }); }
-    function dimH(x0, x1, y, t, off) {        // mm coordinates, label offset in px
+    function E(k, v, ref, int) { return { k: k, t: n(v), ref: ref, int: int }; }
+    function dimH(x0, x1, y, parts, off, clear) {        // mm coordinates, label offset / clearance in px
       if (Math.abs(x1 - x0) < 1e-6) return "";
       var a = X(Math.min(x0, x1)), b = X(Math.max(x0, x1)), yy = Y(y) + (off || 0);
       return '<path d="M' + a + ' ' + yy + 'H' + b + '" stroke="' + col + '" stroke-width="1.3" marker-start="url(#pbA)" marker-end="url(#pbA)"/>' +
-             lab((a + b) / 2, yy - 10, t);
+             etxt((a + b) / 2, yy - Math.max(10, (clear || 0) + 9), parts);
     }
-    function dimV(y0, y1, x, t, off) {
+    function dimV(y0, y1, x, parts, off, clear) {
       if (Math.abs(y1 - y0) < 1e-6) return "";
       var a = Y(Math.max(y0, y1)), b = Y(Math.min(y0, y1)), xx = X(x) + (off || 0);
       return '<path d="M' + xx + ' ' + a + 'V' + b + '" stroke="' + col + '" stroke-width="1.3" marker-start="url(#pbA)" marker-end="url(#pbA)"/>' +
-             lab(xx - 11, (a + b) / 2, t, -90);
+             etxt(xx - Math.max(11, (clear || 0) + 10), (a + b) / 2, parts, { rot: -90 });
     }
-    function refX(c, r) { return r === "R" ? P.DX : r === "C" ? P.DX / 2 : 0; }
-    function refY(c, r) { return r === "B" ? P.DY : r === "C" ? P.DY / 2 : 0; }
-    function lbl(v, r, L) { return r === "C" ? n(L / 2) + " (centras)" : n(v); }
+    function refX(r) { return r === "R" ? P.DX : 0; }
+    function refY(r) { return r === "B" ? P.DY : 0; }
+    // a centred value is shown as its distance from the edge the line starts at; typing a number measures from there
+    function pv(k, v, r, L, from) { return r === "C" ? [E(k, L / 2, from), " (centras)"] : [E(k, v)]; }
     try {
       if (o.kind === "hole" || o.kind === "circle") {
         var p0 = { x: PART.abs(o.x, o.xr, P.DX), y: PART.abs(o.y, o.yr, P.DY) };   // the measured point (centre of a centred group)
-        var ex = o.xr === "C" ? 0 : refX(0, o.xr), ey = o.yr === "C" ? 0 : refY(0, o.yr);
-        out.push(dimH(ex, p0.x, p0.y, lbl(o.x, o.xr, P.DX)));
-        out.push(dimV(ey, p0.y, p0.x, lbl(o.y, o.yr, P.DY)));
-        if (o.kind === "circle") out.push(lab(X(p0.x), Y(p0.y) - o.D / 2 * view.s - 10, "Ø" + n(o.D)));
-        if (o.kind === "hole" && o.n > 1) {
-          var pts = PART.holePts(o, P), lp = pts[Math.min(pts.length, o.n) - 1];
-          out.push(lab(X(lp.x) + (o.dir === "X" ? 0 : 30), Y(lp.y) + (o.dir === "X" ? 18 : 0), "×" + o.n + " kas " + n(o.step)));
+        var rp = (o.kind === "hole" ? Math.max(o.d / 2 * view.s, 3) : o.D / 2 * view.s);
+        out.push(dimH(refX(o.xr), p0.x, p0.y, pv("x", o.x, o.xr, P.DX, "L"), 0, rp));
+        out.push(dimV(refY(o.yr), p0.y, p0.x, pv("y", o.y, o.yr, P.DY, "F"), 0, rp));
+        if (o.kind === "circle") out.push(etxt(X(p0.x), Y(p0.y) - rp - 12, ["Ø", E("D", o.D)]));
+        if (o.kind === "hole") {
+          var hp = PART.holePts(o, P)[0];
+          var size = o.through ? ["Ø", E("d", o.d), " kiaurai"] : ["Ø", E("d", o.d), " × ", E("depth", o.depth)];
+          out.push(etxt(X(hp.x) + Math.max(o.d / 2 * view.s, 3) + 8, Y(hp.y) - Math.max(o.d / 2 * view.s, 3) - 8, size, { a: "start" }));
+          if (o.n > 1 || o.preset === "shelf") {
+            var pts = PART.holePts(o, P), lp = pts[Math.min(pts.length, cntN(o)) - 1];
+            out.push(etxt(X(lp.x) + (o.dir === "X" ? 0 : 34), Y(lp.y) + (o.dir === "X" ? 18 : 0), ["×", E("n", o.n, null, true), " kas ", E("step", o.step)]));
+          }
         }
       } else if (o.kind === "edge") {
-        var e0 = PART.edgePts(o, P)[0], ep = PART.edgePoint(e0.edge, e0.s, P), inset = 16;
+        var e0 = PART.edgePts(o, P)[0], ep = PART.edgePoint(e0.edge, e0.s, P), inset = 16, dpx = o.depth * view.s;
         if (e0.edge === "L" || e0.edge === "R") {
-          var from = o.sr === "B" ? P.DY : 0;
-          out.push(dimV(from, e0.s, e0.edge === "L" ? 0 : P.DX, lbl(o.s, o.sr, P.DY), e0.edge === "L" ? inset + o.depth * view.s : -inset - o.depth * view.s));
+          out.push(dimV(o.sr === "B" ? P.DY : 0, e0.s, e0.edge === "L" ? 0 : P.DX, pv("s", o.s, o.sr, P.DY, "F"), e0.edge === "L" ? inset + dpx : -inset - dpx));
         } else {
-          var fx = o.sr === "R" ? P.DX : 0;
-          out.push(dimH(fx, e0.s, e0.edge === "F" ? 0 : P.DY, lbl(o.s, o.sr, P.DX), e0.edge === "F" ? -inset - o.depth * view.s : inset + o.depth * view.s));
+          out.push(dimH(o.sr === "R" ? P.DX : 0, e0.s, e0.edge === "F" ? 0 : P.DY, pv("s", o.s, o.sr, P.DX, "L"), e0.edge === "F" ? -inset - dpx : inset + dpx));
         }
-        out.push(txt(X(ep[0]) + (e0.edge === "L" ? 8 + o.depth * view.s : e0.edge === "R" ? -8 - o.depth * view.s : 0),
-                     Y(ep[1]) + (e0.edge === "F" ? -12 - o.depth * view.s : e0.edge === "B" ? 12 + o.depth * view.s : 0),
-                     "gylis " + n(o.depth), { fs: 11.5, c: col, a: e0.edge === "L" ? "start" : e0.edge === "R" ? "end" : "middle" }));
+        out.push(etxt(X(ep[0]) + (e0.edge === "L" ? 8 + dpx : e0.edge === "R" ? -8 - dpx : 0),
+                      Y(ep[1]) + (e0.edge === "F" ? -12 - dpx : e0.edge === "B" ? 12 + dpx : 0),
+                      ["Ø", E("d", o.d), " gylis ", E("depth", o.depth)],
+                      { fs: 12, a: e0.edge === "L" ? "start" : e0.edge === "R" ? "end" : "middle" }));
       } else if (o.kind === "groove") {
         var g = PART.grooveBox(o, P), mid = (Math.max(g.a0, 0) + Math.min(g.a1, g.along)) / 2;
+        var wd = [E("w", o.w), " × ", E("depth", o.depth)];
         if (g.dir === "X") {
-          if (o.pr !== "C") out.push(o.pr === "F" ? dimV(0, g.c0, mid, n(o.p)) : dimV(g.c1, P.DY, mid, n(o.p)));
-          out.push(lab(X(mid) + 46, Y(g.c0) + 12, n(o.w) + " × " + n(o.depth)));
-          if (!o.full) out.push(o.ar === "R" ? dimH(g.a1, P.DX, g.c1, n(o.a), -14) : o.ar === "L" ? dimH(0, g.a0, g.c1, n(o.a), -14) : "",
-                                dimH(g.a0, g.a1, g.c0, n(o.len), 16));
+          if (o.pr !== "C") out.push(o.pr === "F" ? dimV(0, g.c0, mid, [E("p", o.p)]) : dimV(g.c1, P.DY, mid, [E("p", o.p)]));
+          out.push(etxt(X(mid) + 46, Y(g.c0) + 13, wd));
+          if (!o.full) out.push(o.ar === "R" ? dimH(g.a1, P.DX, g.c1, [E("a", o.a)], -14) : o.ar === "L" ? dimH(0, g.a0, g.c1, [E("a", o.a)], -14) : "",
+                                dimH(g.a0, g.a1, g.c0, [E("len", o.len)], 16));
         } else {
-          if (o.pr !== "C") out.push(o.pr === "L" ? dimH(0, g.c0, mid, n(o.p)) : dimH(g.c1, P.DX, mid, n(o.p)));
-          out.push(lab(X(g.c1) + 30, Y(mid) - 30, n(o.w) + " × " + n(o.depth)));
-          if (!o.full) out.push(o.ar === "B" ? dimV(g.a1, P.DY, g.c1, n(o.a), 16) : o.ar === "F" ? dimV(0, g.a0, g.c1, n(o.a), 16) : "",
-                                dimV(g.a0, g.a1, g.c0, n(o.len), -16));
+          if (o.pr !== "C") out.push(o.pr === "L" ? dimH(0, g.c0, mid, [E("p", o.p)]) : dimH(g.c1, P.DX, mid, [E("p", o.p)]));
+          out.push(etxt(X(g.c1) + 30, Y(mid) - 30, wd));
+          if (!o.full) out.push(o.ar === "B" ? dimV(g.a1, P.DY, g.c1, [E("a", o.a)], 16) : o.ar === "F" ? dimV(0, g.a0, g.c1, [E("a", o.a)], 16) : "",
+                                dimV(g.a0, g.a1, g.c0, [E("len", o.len)], -16));
         }
       } else if (o.kind === "notch") {
-        var nr = PART.notchRect(o, P), F = o.corner[0] === "F";
-        out.push(dimH(nr.x0, nr.x1, F ? nr.y1 : nr.y0, n(o.a), F ? -14 : 14));
-        var L2 = o.corner[1] === "L";
-        out.push(dimV(nr.y0, nr.y1, L2 ? nr.x1 : nr.x0, n(o.b), L2 ? 14 : -14));
+        var nr = PART.notchRect(o, P), F = o.corner[0] === "F", L2 = o.corner[1] === "L";
+        out.push(dimH(nr.x0, nr.x1, F ? nr.y1 : nr.y0, [E("a", o.a)], F ? -14 : 14));
+        out.push(dimV(nr.y0, nr.y1, L2 ? nr.x1 : nr.x0, [E("b", o.b)], L2 ? 14 : -14));
       } else if (o.kind === "cut") {
         var cr = PART.cutRect(o, P), my = (cr.y0 + cr.y1) / 2, mx = (cr.x0 + cr.x1) / 2;
-        if (o.xr === "L") out.push(dimH(0, cr.x0, my, n(o.x))); else if (o.xr === "R") out.push(dimH(cr.x1, P.DX, my, n(o.x)));
-        if (o.yr === "F") out.push(dimV(0, cr.y0, mx, n(o.y))); else if (o.yr === "B") out.push(dimV(cr.y1, P.DY, mx, n(o.y)));
-        out.push(lab(X(mx), Y(my), n(o.w) + " × " + n(o.h)));
+        if (o.xr === "L") out.push(dimH(0, cr.x0, my, [E("x", o.x)])); else if (o.xr === "R") out.push(dimH(cr.x1, P.DX, my, [E("x", o.x)]));
+        if (o.yr === "F") out.push(dimV(0, cr.y0, mx, [E("y", o.y)])); else if (o.yr === "B") out.push(dimV(cr.y1, P.DY, mx, [E("y", o.y)]));
+        out.push(etxt(X(mx), Y(my), [E("w", o.w), " × ", E("h", o.h)]));
       }
     } catch (e) { /* half-typed numbers: draw nothing */ }
     return out.join("");
+  }
+  function cntN(o) { return Math.max(1, Math.round(o.n || 1)); }
+
+  /* ---------------------------------------------------------------- typing a value on the drawing */
+  var inl = null;
+  function closeInline(apply) {
+    if (!inl) return;
+    var box = inl; inl = null;
+    if (apply) {
+      var v = parseIn(box.input.value);
+      if (fin(v)) applyEdit(box.tgt, box.k, box.ref, box.int ? Math.round(v) : v);
+    }
+    box.input.remove();
+  }
+  function openInline(t) {
+    closeInline(true);
+    var o = selOp();
+    if (t.dataset.tgt !== "part" && !o) return;
+    var r = t.getBoundingClientRect(), sr = el.stage.getBoundingClientRect();
+    var inp = document.createElement("input");
+    inp.type = "text"; inp.inputMode = "decimal"; inp.className = "pb-inl"; inp.autocomplete = "off";
+    inp.value = t.textContent;
+    var w = Math.max(74, r.width + 34);
+    inp.style.left = (r.left + r.width / 2 - sr.left - w / 2) + "px";
+    inp.style.top = (r.top + r.height / 2 - sr.top - 17) + "px";
+    inp.style.width = w + "px";
+    el.stage.appendChild(inp);
+    inl = { input: inp, tgt: t.dataset.tgt, k: t.dataset.ek, ref: t.dataset.eref, int: !!t.dataset.int };
+    inp.addEventListener("keydown", function (e) {
+      if (e.key === "Enter") { e.preventDefault(); closeInline(true); }
+      else if (e.key === "Escape") { e.preventDefault(); e.stopPropagation(); closeInline(false); }
+      else if (e.key === "Tab") { e.preventDefault(); closeInline(true); }
+    });
+    inp.addEventListener("blur", function () { setTimeout(function () { if (inl && inl.input === inp) closeInline(true); }, 0); });
+    inp.focus(); inp.select();
+  }
+  var REFKEY = { x: "xr", y: "yr", s: "sr", p: "pr", a: "ar" };
+  function applyEdit(tgt, k, ref, v) {
+    if (tgt === "part") {
+      if (!(v > 0)) { toast("Matmuo turi būti didesnis už 0.", true); return; }
+      part[k] = v;
+    } else {
+      var o = selOp(); if (!o) return;
+      if (k === "n") v = Math.max(1, Math.round(v));
+      if (v < 0 || (v === 0 && /^(d|D|w|h|len|a|b|n|step|depth)$/.test(k) && !(k === "a" && o.kind === "groove"))) {
+        toast("Reikšmė turi būti didesnė už 0.", true); return;
+      }
+      var rk = REFKEY[k];
+      if (rk && o[rk] === "C" && ref) o[rk] = ref;       // typed a distance for a centred feature: measure it from that edge
+      if (k === "d") { setOpt(o, "d", v); }
+      else o[k] = v;
+    }
+    commit(); render();
+  }
+
+  /* ---------------------------------------------------------------- copy / paste */
+  var KEY_CLIP = "xxlfix.builder.clip.v1", clipMem = null;
+  function clipGet() { var c = load(KEY_CLIP); return (c && Array.isArray(c.ops)) ? c.ops : clipMem || []; }
+  function clipSet(ops) {
+    clipMem = JSON.parse(JSON.stringify(ops));
+    store(KEY_CLIP, { ops: clipMem, t: Date.now() });
+    renderList();
+  }
+  function copyOps(all) {
+    var ops = all ? part.ops : (selOp() ? [selOp()] : []);
+    if (!ops.length) { toast(all ? "Nėra ką kopijuoti." : "Pirma pasirinkite operaciją.", true); return; }
+    clipSet(ops);
+    toast("Nukopijuota: " + (ops.length === 1 ? title(ops[0]) : plural(ops.length, "operacija", "operacijos", "operacijų")) +
+          ". Įklijuokite Ctrl+V — galima ir kitoje detalėje.");
+  }
+  function same(a, b) {
+    var x = JSON.parse(JSON.stringify(a)), y = JSON.parse(JSON.stringify(b)); delete x.id; delete y.id;
+    return JSON.stringify(x) === JSON.stringify(y);
+  }
+  function pasteOps() {
+    var ops = clipGet();
+    if (!ops.length) { toast("Iškarpinė tuščia — pirma nukopijuokite operaciją (Ctrl+C).", true); return; }
+    var lastId = null;
+    ops.forEach(function (src) {
+      var c = JSON.parse(JSON.stringify(src));
+      c.id = PART.make("hole", part).id;
+      // pasted onto itself: put the copy beside the original, like "Dubliuoti"
+      if (part.ops.some(function (q) { return same(q, c); })) {
+        var g0 = JSON.parse(JSON.stringify(c));
+        if (c.kind === "notch") {
+          var used = {}; part.ops.forEach(function (q) { if (q.kind === "notch") used[q.corner] = 1; });
+          ["BR", "FR", "BL", "FL"].some(function (k) { if (!used[k]) { c.corner = k; return true; } return false; });
+        } else if (c.kind === "groove") moveOp(c, g0, c.dir === "Y" ? 40 : 0, c.dir === "X" ? 40 : 0);
+        else moveOp(c, g0, 50, 0);
+      }
+      part.ops.push(c); lastId = c.id;
+    });
+    selId = ops.length === 1 ? lastId : null;
+    commit(); render();
+    toast("Įklijuota: " + plural(ops.length, "operacija", "operacijos", "operacijų") + ".");
   }
 
   /* ---------------------------------------------------------------- moving */
@@ -3963,6 +4090,9 @@ var PB = (function () {
   }
   function onDown(ev) {
     if (ev.button !== undefined && ev.button !== 0) return;
+    var ek = ev.target.closest && ev.target.closest("[data-ek]");
+    if (ek) { ev.preventDefault(); openInline(ek); return; }
+    if (inl) closeInline(true);
     var g = ev.target.closest && ev.target.closest("g.op");
     if (!g) { if (selId !== null) { selId = null; render(); } return; }
     var id = +g.dataset.id, o = null;
@@ -4277,6 +4407,7 @@ var PB = (function () {
       if (b.dataset.pset) { part[b.dataset.pset] = +b.dataset.v; commit(); render(); }
       if (b.dataset.act === "del") delOp();
       if (b.dataset.act === "dup") dupOp();
+      if (b.dataset.act === "copy") copyOps(false);
     });
   }
 
@@ -4308,6 +4439,10 @@ var PB = (function () {
     }).join("");
     el.tiles.addEventListener("click", function (e) {
       var b = e.target.closest("[data-add]"); if (b) addOp(b.dataset.add);
+    });
+    $("pbClipBar").addEventListener("click", function (e) {
+      var b = e.target.closest("[data-clip]"); if (!b) return;
+      if (b.dataset.clip === "all") copyOps(true); else pasteOps();
     });
     el.ops.addEventListener("click", function (e) {
       var r = e.target.closest(".pb-op"); if (!r) return;
@@ -4362,6 +4497,11 @@ var PB = (function () {
       if (mod && (e.key === "z" || e.key === "Z") && !e.shiftKey) { e.preventDefault(); undo(); return; }
       if (mod && (e.key === "y" || ((e.key === "z" || e.key === "Z") && e.shiftKey))) { e.preventDefault(); redo(); return; }
       if (mod && (e.key === "d" || e.key === "D")) { e.preventDefault(); dupOp(); return; }
+      if (mod && (e.key === "c" || e.key === "C")) {
+        if (window.getSelection && String(window.getSelection())) return;      // copying selected text
+        if (selOp()) { e.preventDefault(); copyOps(false); } return;
+      }
+      if (mod && (e.key === "v" || e.key === "V")) { e.preventDefault(); pasteOps(); return; }
       var o = selOp(); if (!o) return;
       if (e.key === "Delete" || e.key === "Backspace") { e.preventDefault(); delOp(); return; }
       var st = e.shiftKey ? 10 : 1, d = { ArrowLeft: [-st, 0], ArrowRight: [st, 0], ArrowUp: [0, st], ArrowDown: [0, -st] }[e.key];
